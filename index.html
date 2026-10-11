@@ -457,10 +457,8 @@
   <!-- ========================================================================= -->
   <canvas id="waterStreamCanvas" class="fixed inset-0 pointer-events-none z-[9990]"></canvas>
 
-  <!-- TAKUNGAN AIR BAWAH (LUTSINAR 30%, TANPA SEMPADAN KERAS, BERKOCAK DENGAN IKAN) -->
-  <div id="water-reservoir-wrapper" class="fixed bottom-9 left-0 right-0 pointer-events-none z-[9991] overflow-hidden transition-all duration-700" style="height: 40vh; opacity: 0.30;">
-    <canvas id="waterPoolCanvas" class="w-full h-full block"></canvas>
-  </div>
+  <!-- TAKUNGAN AIR BAWAH (PENUH SKRIN, LUTSINAR 30%, TANPA SEMPADAN, IKAN BERKOCAK) -->
+  <canvas id="waterPoolCanvas" class="fixed inset-0 pointer-events-none z-[9991]" style="opacity: 0.30;"></canvas>
 
   <!-- BAR STATUS DI BAWAH (bottom-0 h-9) -->
   <div id="bottom-status-bar" class="fixed bottom-0 left-0 right-0 h-9 z-[9999] pointer-events-auto flex items-center justify-between sm:justify-center gap-2 sm:gap-6 bg-slate-950/95 backdrop-blur-md border-t border-cyan-500/60 px-3 text-[8.5px] sm:text-[9.5px] font-pixel shadow-2xl">
@@ -619,7 +617,7 @@
     };
 
     // =========================================================================
-    // BANK SOALAN RBT TINGKATAN 1 (LENGKAP KESEMUA SUBTOPIK & KAITAN PAIP)
+    // BANK SOALAN RBT TINGKATAN 1 (LENGKAP MENGIKUT SETIAP SUBTOPIK & KAITAN PAIP)
     // =========================================================================
     const QUESTION_BANK = [
       // BAB 1.1: DUNIA REKA BENTUK
@@ -776,7 +774,7 @@
       if (e.gamma !== null && e.gamma !== undefined) {
         // e.gamma = condong paksi kiri/kanan [-90, 90] darjah
         const clampedGamma = Math.max(-45, Math.min(45, e.gamma));
-        targetTilt = (clampedGamma / 45) * 0.85; // Kecerunan jelas
+        targetTilt = (clampedGamma / 45) * 1.5; // Kecerunan sudut yang sangat responsif
       }
     }
 
@@ -805,7 +803,7 @@
     window.addEventListener('mousemove', (e) => {
       if (!isGyroPermissionGranted) {
         const norm = (e.clientX / window.innerWidth) - 0.5;
-        targetTilt = norm * 0.75;
+        targetTilt = norm * 1.4;
       }
     });
 
@@ -835,7 +833,6 @@
       if (!audioEnabled) return;
       try {
         initAudio();
-        // Bunyi ketukan logam sepana mengetatkan paip
         playTone(1350, "sine", 0.08, 0.16);
         setTimeout(() => playTone(950, "triangle", 0.12, 0.14), 70);
       } catch(e) {}
@@ -894,9 +891,8 @@
 
     function triggerDisasterMode() {
       isDisasterTriggered = true;
-      const resWrapper = document.getElementById("water-reservoir-wrapper");
-      resWrapper.style.height = "100vh";
-      resWrapper.style.opacity = "0.75";
+      const pool = document.getElementById("waterPoolCanvas");
+      if (pool) pool.style.opacity = "0.75";
 
       document.getElementById("main-content-wrapper").classList.add("hidden");
       document.getElementById("top-heroes-section").classList.add("hidden");
@@ -914,8 +910,8 @@
 
     function revertDisasterMode() {
       isDisasterTriggered = false;
-      const resWrapper = document.getElementById("water-reservoir-wrapper");
-      resWrapper.style.opacity = "0.30";
+      const pool = document.getElementById("waterPoolCanvas");
+      if (pool) pool.style.opacity = "0.30";
 
       document.getElementById("main-content-wrapper").classList.remove("hidden");
       document.getElementById("top-heroes-section").classList.remove("hidden");
@@ -962,21 +958,16 @@
 
     function updateAndRenderStream() {
       streamCtx.clearRect(0, 0, streamCanvas.width, streamCanvas.height);
-      const resWrapper = document.getElementById("water-reservoir-wrapper");
-      const reservoirTopY = resWrapper.getBoundingClientRect().top;
-
       createStreamParticles();
 
       for (let i = streamParticles.length - 1; i >= 0; i--) {
         const p = streamParticles[i];
         p.vy += p.gravity;
-        // Graviti sensor telefon mempengaruhi pesongan arah titisan air
         p.vx += currentTilt * 0.5;
         p.x += p.vx;
         p.y += p.vy;
 
-        if (p.y >= reservoirTopY) {
-          triggerRippleSplash(p.x);
+        if (p.y >= window.innerHeight) {
           streamParticles.splice(i, 1);
           continue;
         }
@@ -991,26 +982,21 @@
     }
 
     // =========================================================================
-    // ENJIN TAKUNGAN AIR (LUTSINAR 30%, TANPA SEMPADAN & IKAN BERPASANGAN)       -->
+    // ENJIN TAKUNGAN AIR (MELIMPAH & CONDONG KESELURUHAN SKRIN SEPERTI CAWAN)   -->
     // =========================================================================
     const poolCanvas = document.getElementById("waterPoolCanvas");
     const poolCtx = poolCanvas.getContext("2d");
     let waveStep = 0;
     let ripples = [];
+    let currentWaterPercent = 40;
 
-    // SENARAI PASANGAN IKAN KECIL COMEL DI DALAM TAKUNGAN AIR
     const FISH_PAIRS = [
-      // Pasangan 1: Ikan Emas Jingga
-      { x: 40, depthRatio: 0.35, vx: 0.9, size: 9, color: '#f97316', eyeColor: '#ffffff', tailOffset: 0 },
-      { x: 65, depthRatio: 0.40, vx: 0.9, size: 7.5, color: '#fb923c', eyeColor: '#ffffff', tailOffset: 0.5 },
-
-      // Pasangan 2: Neon Tetra Cyan
-      { x: 200, depthRatio: 0.60, vx: -0.85, size: 8, color: '#06b6d4', eyeColor: '#ffffff', tailOffset: 1.1 },
-      { x: 228, depthRatio: 0.65, vx: -0.85, size: 6.5, color: '#38bdf8', eyeColor: '#ffffff', tailOffset: 1.6 },
-
-      // Pasangan 3: Ikan Kuning Lemon
-      { x: 120, depthRatio: 0.80, vx: 0.75, size: 8.5, color: '#facc15', eyeColor: '#0f172a', tailOffset: 2.2 },
-      { x: 146, depthRatio: 0.75, vx: 0.75, size: 7, color: '#eab308', eyeColor: '#0f172a', tailOffset: 2.7 }
+      { x: 40, depthRatio: 0.35, vx: 1.1, size: 9, color: '#f97316', eyeColor: '#ffffff', tailOffset: 0 },
+      { x: 68, depthRatio: 0.40, vx: 1.1, size: 7.5, color: '#fb923c', eyeColor: '#ffffff', tailOffset: 0.5 },
+      { x: 220, depthRatio: 0.60, vx: -1.0, size: 8, color: '#06b6d4', eyeColor: '#ffffff', tailOffset: 1.1 },
+      { x: 248, depthRatio: 0.65, vx: -1.0, size: 6.5, color: '#38bdf8', eyeColor: '#ffffff', tailOffset: 1.6 },
+      { x: 140, depthRatio: 0.80, vx: 0.9, size: 8.5, color: '#facc15', eyeColor: '#0f172a', tailOffset: 2.2 },
+      { x: 168, depthRatio: 0.75, vx: 0.9, size: 7, color: '#eab308', eyeColor: '#0f172a', tailOffset: 2.7 }
     ];
 
     function resizePoolCanvas() {
@@ -1018,12 +1004,6 @@
       poolCanvas.height = window.innerHeight;
     }
     window.addEventListener("resize", resizePoolCanvas);
-
-    function triggerRippleSplash(xPos) {
-      if (ripples.length < 25) {
-        ripples.push({ x: xPos, radius: 2, alpha: 0.6 });
-      }
-    }
 
     function renderWaterPool() {
       const w = poolCanvas.width;
@@ -1037,7 +1017,9 @@
       const waveHeight = 6;
       const waveFreq = 0.012;
 
-      // Kecerunan Lembut Tanpa Sempadan Garisan Keras
+      // Aras dasar tengah air mengikut peratus semasa
+      const centerY = h - (h * (currentWaterPercent / 100));
+
       const grad = poolCtx.createLinearGradient(0, 0, 0, h);
       grad.addColorStop(0, "rgba(56, 189, 248, 0.45)");
       grad.addColorStop(0.35, "rgba(2, 132, 199, 0.75)");
@@ -1046,25 +1028,25 @@
       poolCtx.fillStyle = grad;
       poolCtx.beginPath();
 
-      // Kira permukaan atas air yang dicondongkan mengikut sensor graviti telefon
-      const startTiltY = -(0 - w / 2) * currentTilt * 0.45;
-      poolCtx.moveTo(0, waveHeight * Math.sin(waveStep) + startTiltY + 12);
+      // Permukaan air dicondongkan mengikut sensor telefon (boleh naik melepasi bibir atas jika terlalu senget)
+      const startTiltY = -(0 - w / 2) * currentTilt * 0.95;
+      poolCtx.moveTo(0, centerY + waveHeight * Math.sin(waveStep) + startTiltY);
 
       for (let x = 0; x <= w; x += 15) {
-        const tiltOffsetY = -(x - w / 2) * currentTilt * 0.45;
+        const tiltOffsetY = -(x - w / 2) * currentTilt * 0.95;
         const yWave = Math.sin(x * waveFreq + waveStep) * waveHeight +
                       Math.cos(x * 0.02 - waveStep * 0.8) * 3;
-        poolCtx.lineTo(x, yWave + tiltOffsetY + 12);
+        poolCtx.lineTo(x, centerY + yWave + tiltOffsetY);
       }
 
       poolCtx.lineTo(w, h);
       poolCtx.lineTo(0, h);
       poolCtx.closePath();
-      poolCtx.fill(); // Isian air lancar tanpa garis sempadan (stroke dibuang)
+      poolCtx.fill();
 
-      // LUKIS PASANGAN IKAN KECIL COMEL BERENANG DI DALAM AIR
+      // LUKIS PASANGAN IKAN BERENANG DI DALAM AIR
       FISH_PAIRS.forEach((fish, fIdx) => {
-        fish.x += fish.vx + (currentTilt * 1.2);
+        fish.x += fish.vx + (currentTilt * 1.5);
         if (fish.x < 15) {
           fish.x = 15;
           fish.vx = Math.abs(fish.vx);
@@ -1073,8 +1055,8 @@
           fish.vx = -Math.abs(fish.vx);
         }
 
-        const surfaceAtFishX = -(fish.x - w / 2) * currentTilt * 0.45 + 16;
-        const fishY = Math.max(surfaceAtFishX + 18, surfaceAtFishX + (h - surfaceAtFishX) * fish.depthRatio + Math.sin(Date.now() * 0.003 + fIdx) * 3);
+        const surfaceAtFishX = centerY - (fish.x - w / 2) * currentTilt * 0.95;
+        const fishY = Math.min(h - 20, Math.max(surfaceAtFishX + 25, surfaceAtFishX + (h - surfaceAtFishX) * fish.depthRatio + Math.sin(Date.now() * 0.003 + fIdx) * 4));
 
         const isFacingRight = fish.vx >= 0;
         const dirSign = isFacingRight ? 1 : -1;
@@ -1115,23 +1097,6 @@
         poolCtx.restore();
       });
 
-      // Riak Percikan Air Halus
-      for (let i = ripples.length - 1; i >= 0; i--) {
-        const r = ripples[i];
-        r.radius += 1.0;
-        r.alpha -= 0.025;
-        if (r.alpha <= 0) {
-          ripples.splice(i, 1);
-          continue;
-        }
-        const rippleTiltY = -(r.x - w / 2) * currentTilt * 0.45;
-        poolCtx.beginPath();
-        poolCtx.arc(r.x, 12 + rippleTiltY, r.radius, 0, Math.PI * 2);
-        poolCtx.strokeStyle = `rgba(224, 242, 254, ${r.alpha * 0.5})`;
-        poolCtx.lineWidth = 1;
-        poolCtx.stroke();
-      }
-
       requestAnimationFrame(renderWaterPool);
     }
 
@@ -1152,7 +1117,7 @@
         const elapsed = Math.min(MISSION_DEADLINE_TIMESTAMP - MISSION_START_FLOOD_TIMESTAMP, now - MISSION_START_FLOOD_TIMESTAMP);
         const totalDuration = MISSION_DEADLINE_TIMESTAMP - MISSION_START_FLOOD_TIMESTAMP;
         const timeRatio = Math.max(0, Math.min(1, elapsed / totalDuration));
-        floodBase = 40 + (timeRatio * 60); // Bertambah secara linear dari 40% ke 100%
+        floodBase = 40 + (timeRatio * 60);
       }
 
       const repairRatio = Math.min(1, solvedCount / totalQuestionsCount);
@@ -1168,6 +1133,8 @@
       if (studentCount < reqStudents && displayVal < 5) {
         displayVal = 5;
       }
+
+      currentWaterPercent = displayVal;
 
       const isCompletelyDrained = (displayVal <= 0 && studentCount >= reqStudents && solvedCount >= 100);
 
@@ -1186,12 +1153,9 @@
         adminWaterEl.textContent = isCompletelyDrained ? "0% (KERING)" : `${displayVal}%`;
       }
 
-      // Laraskan ketinggian takungan air
-      const resWrapper = document.getElementById("water-reservoir-wrapper");
-      if (isCompletelyDrained) {
-        resWrapper.style.height = "0vh";
-      } else {
-        resWrapper.style.height = `${displayVal}vh`;
+      const poolCanvasEl = document.getElementById("waterPoolCanvas");
+      if (poolCanvasEl) {
+        poolCanvasEl.style.display = isCompletelyDrained ? "none" : "block";
       }
 
       checkDisasterCondition();
