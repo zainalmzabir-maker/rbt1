@@ -264,10 +264,10 @@
             <label class="block text-xs font-pixel text-cyan-300 mb-2">1. PILIH KELAS</label>
             <div class="grid grid-cols-2 gap-3">
               <button type="button" onclick="selectClass('1S1')" id="btn-class-1s1" class="class-btn p-3 bg-slate-800 border-2 border-slate-700 hover:border-cyan-400 rounded-xl font-pixel text-xs text-center transition flex items-center justify-center gap-2">
-                <span>📘</span> KELAS 1S1[cite: 1]
+                <span>📘</span> KELAS 1S1
               </button>
               <button type="button" onclick="selectClass('1S2')" id="btn-class-1s2" class="class-btn p-3 bg-slate-800 border-2 border-slate-700 hover:border-cyan-400 rounded-xl font-pixel text-xs text-center transition flex items-center justify-center gap-2">
-                <span>📗</span> KELAS 1S2[cite: 2]
+                <span>📗</span> KELAS 1S2
               </button>
             </div>
           </div>
@@ -1010,14 +1010,12 @@
       const h = poolCanvas.height;
       poolCtx.clearRect(0, 0, w, h);
 
-      // Lerp orientasi graviti untuk kelicinan pergerakan air
       currentTilt += (targetTilt - currentTilt) * 0.08;
 
       waveStep += 0.04;
       const waveHeight = 6;
       const waveFreq = 0.012;
 
-      // Aras dasar tengah air mengikut peratus semasa
       const centerY = h - (h * (currentWaterPercent / 100));
 
       const grad = poolCtx.createLinearGradient(0, 0, 0, h);
@@ -1028,7 +1026,6 @@
       poolCtx.fillStyle = grad;
       poolCtx.beginPath();
 
-      // Permukaan air dicondongkan mengikut sensor telefon (boleh naik melepasi bibir atas jika terlalu senget)
       const startTiltY = -(0 - w / 2) * currentTilt * 0.95;
       poolCtx.moveTo(0, centerY + waveHeight * Math.sin(waveStep) + startTiltY);
 
@@ -1376,7 +1373,6 @@
         sessionScore++;
         sessionCorrectIds.push(qData.id);
 
-        // Putar dan gerakkan sepana mengetatkan nat paip
         playWrenchSound();
         const wrench = document.getElementById("cute-wrench-tool");
         if (wrench) {
@@ -1385,7 +1381,6 @@
           wrench.classList.add("wrench-active-repair");
         }
 
-        // Tunjukkan percikan pembaikan seketika
         const spark = document.getElementById("repair-spark-indicator");
         if (spark) {
           spark.classList.remove("hidden", "spark-anim");
