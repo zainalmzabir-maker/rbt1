@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Misi Paip SEMEKAR RBT Tingkatan 1 - Baiki Kebocoran Bengkel</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Retro Pixel & Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pixel-font: 'Press Start 2P', monospace;
+      --mono-font: 'Share Tech Mono', monospace;
+      --retro-font: 'VT323', monospace;
+    }
+    body {
+      font-family: var(--mono-font);
+      background-color: #050b14;
+      color: #e2e8f0;
+      overflow-x: hidden;
+    }
+    .font-pixel { font-family: var(--pixel-font); }
+    .font-retro { font-family: var(--retro-font); }
+
+    .crt-overlay {
+      background: linear-gradient(rgba(18, 24, 38, 0) 50%, rgba(0, 15, 30, 0.28) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+    }
+
+    canvas {
+      image-rendering: pixelated;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #071322; }
+    ::-webkit-scrollbar-thumb { background: #0284c7; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+
+    @keyframes water-pulse {
+      0%, 100% { filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.7)); }
+      50% { filter: drop-shadow(0 0 4px rgba(14, 165, 233, 0.4)); }
+    }
+    .water-alarm-active {
+      animation: water-pulse 1s infinite;
+    }
+
+    @keyframes pipe-shake {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-1px) rotate(-0.5deg); }
+      75% { transform: translateY(1px) rotate(0.5deg); }
+    }
+    .shake-pipe {
+      animation: pipe-shake 0.25s infinite;
+    }
+
+    @keyframes question-appear {
+      0% {
+        opacity: 0;
+        transform: translateY(-12px) scale(0.98);
+        filter: brightness(1.5);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: brightness(1);
+      }
+    }
+    .animate-question-new {
+      animation: question-appear 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative selection:bg-cyan-600 selection:text-white pb-52">
+
+  <div class="fixed inset-0 crt-overlay z-20 pointer-events-none opacity-25"></div>
+
+  <!-- KAWASAN PAIP PECAH & BOCOR DI ATAS SKRIN -->
+  <div id="top-leaking-pipe-wrapper" class="fixed top-0 left-0 right-0 z-40 pointer-events-none flex justify-center">
+    <div class="relative w-full max-w-5xl px-4 flex items-center justify-between">
+      
+      <!-- Batang Paip Utama & Flange -->
+      <div class="relative flex items-center">
+        <svg width="220" height="70" viewBox="0 0 220 70" class="drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)] shake-pipe">
+          <rect x="0" y="10" width="160" height="24" fill="#475569" stroke="#1e293b" stroke-width="2"/>
+          <rect x="0" y="14" width="160" height="6" fill="#94a3b8" opacity="0.6"/>
+          <rect x="40" y="6" width="12" height="32" rx="2" fill="#334155" stroke="#0f172a" stroke-width="2"/>
+          <rect x="110" y="6" width="12" height="32" rx="2" fill="#334155" stroke="#0f172a" stroke-width="2"/>
+          <path d="M 160 10 L 195 10 A 10 10 0 0 1 205 20 L 205 55 L 180 55 L 180 34 L 160 34 Z" fill="#475569" stroke="#1e293b" stroke-width="2"/>
+          <ellipse cx="192.5" cy="55" rx="12.5" ry="4" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
+          <path d="M 175 22 L 183 26 L 179 30 L 188 33" stroke="#e0f2fe" stroke-width="2" fill="none"/>
+        </svg>
+
+        <!-- Titik Pancutan Air Dari Mulut Paip -->
+        <div id="pipe-nozzle-source" class="absolute left-[192px] top-[55px] w-2 h-2"></div>
+      </div>
+
+      <!-- Tolok Tekanan Air -->
+      <div class="hidden sm:flex items-center gap-2 bg-slate-900/90 border-2 border-cyan-500/80 rounded-xl px-3 py-1.5 shadow-lg backdrop-blur-md">
+        <span class="text-xl">🚰</span>
+        <div>
+          <div class="text-[9px] font-pixel text-cyan-400">TEKANAN PAIP:</div>
+          <div id="pipe-pressure-text" class="text-xs font-pixel text-red-400 animate-pulse">KRITIKAL (8.5 BAR)</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- HEADER UTAMA -->
+  <header class="bg-slate-950/95 backdrop-blur border-b-2 border-cyan-500/70 sticky top-0 z-30 px-3 sm:px-4 py-2.5 shadow-2xl mt-12 sm:mt-10">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-cyan-700 flex items-center justify-center text-2xl shadow-lg shadow-cyan-600/40 border border-cyan-300">
+          🔧
+        </div>
+        <div>
+          <h1 class="text-xs sm:text-sm font-pixel text-cyan-300 tracking-wider">MISI PAIP SEMEKAR (RBT T1)</h1>
+          <p class="text-[11px] text-cyan-200 font-retro tracking-wider">OPERASI MEMBAIKI KEBOCORAN AIR BENGKEL RBT (1S1 & 1S2)</p>
+        </div>
+      </div>
+
+      <!-- TIMER TEMPOH AKHIR & PENYERTAAN -->
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="flex items-center gap-2 bg-black/70 border border-cyan-500/50 rounded-xl px-2.5 py-1.5 shadow-inner text-xs font-mono">
+          <span class="text-cyan-400 font-pixel text-[9px]">DEADLINE:</span>
+          <span id="countdown-timer-text" class="text-yellow-300 font-pixel text-[10px]">--:--:--</span>
+        </div>
+        <div class="flex items-center gap-2 bg-black/70 border border-blue-500/50 rounded-xl px-2.5 py-1.5 shadow-inner text-xs font-mono">
+          <span class="text-gray-400 font-pixel text-[9px]">JURUTEKNIK:</span>
+          <span id="unique-student-count-badge" class="text-cyan-400 font-pixel text-[11px] font-bold">0/15</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2" id="header-nav-buttons">
+        <button type="button" onclick="navigateView('home')" id="nav-btn-home" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs font-pixel text-gray-200 transition">
+          UTAMA
+        </button>
+        <button type="button" onclick="navigateView('leaderboard')" id="nav-btn-ranking" class="px-2.5 py-1.5 bg-cyan-800 hover:bg-cyan-700 border border-cyan-400 rounded text-xs font-pixel text-cyan-200 transition shadow">
+          RANKING 🏆
+        </button>
+        <button type="button" onclick="openAdminModal()" id="nav-btn-admin" class="px-2.5 py-1.5 bg-blue-950 hover:bg-blue-900 border-2 border-blue-400 rounded text-xs font-pixel text-white transition shadow-lg" title="Portal Guru / Admin">
+          ADMIN 🔒
+        </button>
+        <button type="button" onclick="toggleAudio()" id="audio-toggle-btn" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs text-cyan-300" title="Audio">
+          🔊
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- RUANGAN TETAP: 3 WIRA PEMBAIKIAN TERBAIK -->
+  <section id="top-heroes-section" class="bg-gradient-to-r from-slate-950 via-cyan-950/70 to-slate-950 border-b-2 border-cyan-500/60 sticky top-[73px] sm:top-[65px] z-25 backdrop-blur-md shadow-xl px-3 py-2">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="text-lg animate-bounce">🧰</span>
+        <span class="font-pixel text-[10px] sm:text-xs text-cyan-300 tracking-wider">3 WIRA PAIP SEMEKAR TERBAIK:</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full md:w-auto flex-1 max-w-3xl" id="top-3-heroes-container"></div>
+    </div>
+  </section>
+
+  <!-- PAPARAN BENCANA (JIKA GAGAL DAN AIR MEMENUHI 100% RUANG) -->
+  <div id="disaster-banner-container" class="hidden max-w-4xl mx-auto p-4 relative z-30 mt-6">
+    <div class="bg-blue-950/95 border-4 border-cyan-400 rounded-3xl p-6 sm:p-8 text-center shadow-[0_0_60px_rgba(6,182,212,0.8)] backdrop-blur-md animate-pulse">
+      <div class="text-5xl sm:text-6xl mb-3">🌊 ⚠️ 🌊</div>
+      <h2 class="text-base sm:text-xl font-pixel text-cyan-300 mb-2 leading-relaxed">
+        BENGKEL RBT DILIMPAHI AIR SEPENUHNYA! OPERASI GAGAL!
+      </h2>
+      <p class="text-xs sm:text-sm text-gray-200 font-mono mb-4 leading-relaxed">
+        Tempoh pembaikan telah tamat pada jam 5.00 Petang. Syarat minimum 15 orang murid dan 100 soalan gagal dipenuhi sebelum tempoh tamat.
+      </p>
+      <div class="inline-block bg-black/80 border-2 border-cyan-400 rounded-2xl p-4 mb-4">
+        <p class="text-xs font-pixel text-yellow-300 mb-1">AKSES DIKUNCI KEPADA GURU SAHAJA</p>
+        <p class="text-[11px] text-gray-300 font-mono">Guru boleh menyemak rekod pencapaian murid melalui Portal Admin.</p>
+      </div>
+      <div>
+        <button type="button" onclick="openAdminModal()" class="px-6 py-3 bg-cyan-700 hover:bg-cyan-600 border-2 border-yellow-300 rounded-xl font-pixel text-xs text-white shadow-xl transition transform hover:scale-105">
+          🔒 BUKA PORTAL KAWALAN ADMIN
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KANDUNGAN UTAMA -->
+  <main id="main-content-wrapper" class="max-w-6xl w-full mx-auto p-3 sm:p-4 relative z-10">
+
+    <!-- VIEW 1: HOME -->
+    <section id="view-home" class="view-panel space-y-6">
+
+      <div class="bg-gradient-to-r from-slate-900 via-cyan-950/40 to-slate-900 border-2 border-cyan-600/70 rounded-2xl p-5 sm:p-6 shadow-2xl backdrop-blur-md">
+        <div class="flex items-center gap-3 mb-3">
+          <span class="text-2xl sm:text-3xl">📘</span>
+          <div>
+            <h2 class="text-sm sm:text-base font-pixel text-cyan-300">PANDUAN OPERASI PEMBAIKAN PAIP BENGKEL RBT</h2>
+            <p class="text-xs text-cyan-200 font-mono">
+              Tempoh Akhir Operasi: <strong>Jam 5.00 Petang (12 Oktober 2026)</strong>
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 my-3 text-xs">
+          <div class="bg-black/60 p-3 rounded-xl border border-cyan-500/30">
+            <div class="font-pixel text-cyan-400 mb-1 text-[11px]">1. KUMPUL MARKAH /40</div>
+            <p class="text-gray-300 text-[11px] leading-relaxed">
+              Setiap murid diberi <strong>4 kali peluang percubaan</strong> (10 soalan/sesi). Markah setiap sesi dicantum sehingga <strong>40 markah penuh</strong>.
+            </p>
+          </div>
+
+          <div class="bg-black/60 p-3 rounded-xl border border-blue-500/30">
+            <div class="font-pixel text-blue-400 mb-1 text-[11px]">2. SURUTKAN AIR 0%</div>
+            <p class="text-gray-300 text-[11px] leading-relaxed">
+              Air disurutkan sehingga 0% apabila <strong>semua 100 soalan</strong> dijawab tepat DAN sekurang-kurangnya <strong>15 murid berbeza</strong> turut serta.
+            </p>
+          </div>
+
+          <div class="bg-black/60 p-3 rounded-xl border border-teal-500/30">
+            <div class="font-pixel text-teal-400 mb-1 text-[11px]">3. PARAS KEKAL SURUT</div>
+            <p class="text-gray-300 text-[11px] leading-relaxed">
+              Setiap injap paip yang dibaiki menutup punca kebocoran secara kekal. Paras limpahan air yang telah surut <strong>tidak akan naik semula</strong>.
+            </p>
+          </div>
+
+          <div class="bg-black/60 p-3 rounded-xl border border-amber-500/30">
+            <div class="font-pixel text-amber-400 mb-1 text-[11px]">4. PARAS ASAL 40%</div>
+            <p class="text-gray-300 text-[11px] leading-relaxed">
+              Secara lalai, air telah memenuhi <strong>40% ketinggian bengkel</strong> seumpama cawan diisi air. Bertindak pantas sebelum melimpah 100%!
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-3 p-3 rounded-xl bg-cyan-950/40 border border-cyan-600/50 flex items-center justify-between text-xs">
+          <div class="text-gray-300 font-mono">
+            ⏳ Masa Baki Menutup Injap Induk:
+          </div>
+          <div id="inline-mission-timer" class="font-pixel text-yellow-300 font-bold text-xs sm:text-sm">
+            -- Jam -- Minit -- Saat
+          </div>
+        </div>
+      </div>
+
+      <!-- BORANG PENDAFTARAN ANGGOTA TEKNIKAL -->
+      <div class="max-w-2xl mx-auto bg-slate-900/90 border-2 border-cyan-500/80 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-md">
+        <div class="text-center mb-6">
+          <h2 class="text-lg sm:text-xl font-pixel text-cyan-300 mb-1">DAFTAR JURUTEKNIK PAIP SEMEKAR</h2>
+          <p class="text-xs text-gray-300 font-mono">Pilih kelas dan nama anda untuk memulakan misi membaiki paip</p>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-pixel text-cyan-300 mb-2">1. PILIH KELAS</label>
+            <div class="grid grid-cols-2 gap-3">
+              <button type="button" onclick="selectClass('1S1')" id="btn-class-1s1" class="class-btn p-3 bg-slate-800 border-2 border-slate-700 hover:border-cyan-400 rounded-xl font-pixel text-xs text-center transition flex items-center justify-center gap-2">
+                <span>📘</span> KELAS 1S1
+              </button>
+              <button type="button" onclick="selectClass('1S2')" id="btn-class-1s2" class="class-btn p-3 bg-slate-800 border-2 border-slate-700 hover:border-cyan-400 rounded-xl font-pixel text-xs text-center transition flex items-center justify-center gap-2">
+                <span>📗</span> KELAS 1S2
+              </button>
+            </div>
+          </div>
+
+          <div id="student-select-container" class="opacity-50 pointer-events-none transition">
+            <label class="block text-xs font-pixel text-cyan-300 mb-2">2. PILIH NAMA MURID</label>
+            <select id="student-name-dropdown" class="w-full bg-slate-800 border-2 border-slate-600 focus:border-cyan-400 text-white rounded-xl p-3 text-sm font-mono outline-none">
+              <option value="">-- Sila Pilih Nama Anda --</option>
+            </select>
+          </div>
+
+          <!-- KOTAK STATUS PERCUBAAN -->
+          <div id="student-attempt-status-card" class="hidden p-3.5 rounded-xl border text-xs font-mono transition">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-pixel text-[10px] text-gray-300">STATUS REKOD PEMBAIKAN:</span>
+              <span id="student-attempt-badge" class="px-2 py-0.5 rounded font-pixel text-[10px]">0 / 4 KALI</span>
+            </div>
+            <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden border border-slate-700 my-1.5">
+              <div id="student-attempt-bar" class="h-full bg-cyan-500 rounded-full transition-all duration-500" style="width: 0%;"></div>
+            </div>
+            <p id="student-attempt-message" class="text-gray-300 text-[11px] leading-relaxed mt-1">-</p>
+          </div>
+
+          <button type="button" id="btn-start-quiz" onclick="startQuizSession()" disabled class="w-full mt-3 py-4 bg-gradient-to-r from-cyan-600 via-blue-600 to-teal-500 hover:from-cyan-500 hover:to-teal-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-pixel font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-cyan-700/50 transform active:scale-95 transition border-2 border-cyan-300">
+            🚰 MULAKAN PEMBAIKAN PAIP BOCOR!
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- VIEW 2: SESI KUIZ PEMBAIKAN -->
+    <section id="view-quiz" class="view-panel hidden transition-opacity duration-300">
+      <div id="quiz-card-content" class="max-w-3xl mx-auto bg-slate-900/95 border-2 border-cyan-500/80 rounded-2xl p-5 sm:p-7 shadow-2xl backdrop-blur-md relative">
+        
+        <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-700/80 mb-5">
+          <div class="flex items-center gap-2">
+            <div class="px-2.5 py-1 bg-cyan-500/20 border border-cyan-400 text-cyan-300 rounded font-pixel text-xs" id="quiz-student-badge">
+              JURUTEKNIK
+            </div>
+            <div class="px-2 py-1 bg-slate-800 border border-slate-600 text-gray-300 rounded font-pixel text-xs" id="quiz-class-badge">
+              1S1
+            </div>
+            <div class="px-2 py-1 bg-blue-900/60 border border-blue-500 text-blue-300 rounded font-pixel text-[10px]" id="quiz-attempt-round-badge">
+              CUBAAN: 1/4
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-pixel text-gray-400">SOALAN: <span class="text-cyan-300" id="quiz-progress-text">1/10</span></span>
+            <span class="text-xs font-pixel text-blue-400">SKOR SESI: <span class="text-emerald-400" id="quiz-score-text">0</span>/10</span>
+          </div>
+        </div>
+
+        <!-- TOLOK KEBOCORAN SESI -->
+        <div class="mb-5 bg-black/60 p-3 rounded-xl border border-cyan-900/60">
+          <div class="flex justify-between items-center text-xs font-pixel mb-1.5">
+            <span class="text-cyan-300 flex items-center gap-1.5">
+              <span class="animate-pulse">💧</span> KADAR KEBOCORAN SESI INI:
+            </span>
+            <span class="text-yellow-300" id="session-water-pct">100%</span>
+          </div>
+          <div class="w-full bg-slate-800 h-4 rounded-full overflow-hidden border border-cyan-600/70 p-0.5">
+            <div id="session-water-bar" class="h-full bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-600 rounded-full transition-all duration-700" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <div class="inline-block px-3 py-1 bg-cyan-950/80 border border-cyan-500/50 rounded-full text-[11px] font-pixel text-cyan-300 mb-3" id="quiz-chapter-tag">
+            BAB 5.1 REKA BENTUK SISTEM FERTIGASI (PERPAIPAN)
+          </div>
+          <h3 class="text-base sm:text-lg text-white font-medium leading-relaxed" id="quiz-question-text">
+            Memuatkan soalan...
+          </h3>
+        </div>
+
+        <div class="grid grid-cols-1 gap-3 mb-6" id="quiz-options-container"></div>
+
+        <div id="quiz-explanation-box" class="hidden p-4 rounded-xl border mb-6 text-sm transition">
+          <div class="font-pixel text-xs mb-1" id="quiz-feedback-title">INJAP BERJAYA DIKETATKAN!</div>
+          <p class="text-gray-200" id="quiz-feedback-desc"></p>
+        </div>
+
+        <div class="flex justify-end">
+          <button type="button" id="btn-next-question" onclick="nextQuestion()" disabled class="px-6 py-3 bg-slate-800 text-gray-500 font-pixel text-xs rounded-xl border border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition hover:bg-cyan-600 hover:text-black hover:border-cyan-300">
+            SOALAN SETERUSNYA ➔
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- VIEW 3: KEPUTUSAN SESI -->
+    <section id="view-result" class="view-panel hidden transition-opacity duration-300">
+      <div class="max-w-2xl mx-auto bg-slate-900/95 border-2 border-cyan-500/80 rounded-2xl p-6 sm:p-8 text-center shadow-2xl backdrop-blur-md">
+        <div class="text-4xl mb-2">🎉</div>
+        <h2 class="text-xl sm:text-2xl font-pixel text-cyan-300 mb-1">SESI PEMBAIKAN SELESAI!</h2>
+        <p class="text-sm text-gray-300 mb-1 font-mono" id="result-summary-name">Anggota: -</p>
+        <p class="text-xs text-yellow-300 font-pixel mb-6" id="result-attempt-round-info">PERCUBAAN KE-1 / 4</p>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <div class="bg-black/60 p-3.5 rounded-xl border border-slate-800">
+            <div class="text-[9px] font-pixel text-gray-400 mb-1">JUMLAH MARKAH</div>
+            <div class="text-xl sm:text-2xl font-pixel text-yellow-300" id="result-score-val">0/40</div>
+          </div>
+          <div class="bg-black/60 p-3.5 rounded-xl border border-slate-800">
+            <div class="text-[9px] font-pixel text-gray-400 mb-1">AIR DISURUTKAN</div>
+            <div class="text-xl sm:text-2xl font-pixel text-cyan-400" id="result-drained-val">0%</div>
+          </div>
+          <div class="bg-black/60 p-3.5 rounded-xl border border-slate-800">
+            <div class="text-[9px] font-pixel text-gray-400 mb-1">TEMPOH MASA</div>
+            <div class="text-xl sm:text-2xl font-pixel text-emerald-400" id="result-answering-duration">00:00</div>
+          </div>
+          <div class="bg-black/60 p-3.5 rounded-xl border border-slate-800">
+            <div class="text-[9px] font-pixel text-gray-400 mb-1">SESI TERAKHIR</div>
+            <div class="text-xs sm:text-sm font-mono text-cyan-200 pt-1" id="result-last-session-time">-</div>
+          </div>
+        </div>
+
+        <p class="text-xs sm:text-sm text-gray-300 mb-6 leading-relaxed" id="result-next-attempt-hint">
+          Sumbangan anda telah membantu menyekat kebocoran paip bengkel!
+        </p>
+
+        <div class="flex flex-wrap justify-center gap-3">
+          <button type="button" onclick="navigateView('home')" class="px-5 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl font-pixel text-xs text-white transition">
+            🔄 SESI BARU
+          </button>
+          <button type="button" onclick="navigateView('leaderboard')" class="px-5 py-3 bg-cyan-700 hover:bg-cyan-600 border border-cyan-300 rounded-xl font-pixel text-xs text-white transition shadow-lg">
+            🏆 LIHAT RANKING
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: RANKING KESELURUHAN -->
+    <section id="view-leaderboard" class="view-panel hidden transition-opacity duration-300">
+      <div class="max-w-5xl mx-auto bg-slate-900/95 border-2 border-cyan-600/80 rounded-2xl p-5 sm:p-7 shadow-2xl backdrop-blur-md">
+        
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-800">
+          <div>
+            <h2 class="text-base sm:text-lg font-pixel text-cyan-300 flex items-center gap-2">
+              🏆 PAPAN KECEMERLANGAN PEMBAIKAN PAIP SEMEKAR
+            </h2>
+            <p class="text-xs text-gray-400 font-mono mt-1">Ranking murid berdasarkan markah terkumpul (/40) & sumbangan menyurutkan air bengkel</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="leaderboard-filter-class" onchange="renderLeaderboardTable()" class="bg-slate-800 border border-slate-600 text-cyan-300 rounded px-3 py-1.5 text-xs font-pixel outline-none">
+              <option value="ALL">SEMUA KELAS</option>
+              <option value="1S1">KELAS 1S1</option>
+              <option value="1S2">KELAS 1S2</option>
+            </select>
+            <button type="button" onclick="fetchLeaderboardData()" class="p-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-cyan-300 rounded text-xs" title="Segarkan Data Google Sheet">
+              🔄
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-mono">
+            <thead>
+              <tr class="bg-black/60 text-cyan-400 font-pixel text-[9.5px] border-b border-slate-800">
+                <th class="p-3">KED</th>
+                <th class="p-3">NAMA MURID</th>
+                <th class="p-3">KELAS</th>
+                <th class="p-3 text-center">CUBAAN</th>
+                <th class="p-3 text-center">MARKAH (/40)</th>
+                <th class="p-3 text-center">AIR DISURUTKAN (%)</th>
+                <th class="p-3 text-center">MASA MENJAWAB</th>
+                <th class="p-3 text-center">SESI TERAKHIR</th>
+                <th class="p-3 text-center">TINDAKAN</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-tbody" class="divide-y divide-slate-800/80"></tbody>
+          </table>
+        </div>
+
+        <div id="leaderboard-empty" class="text-center py-8 text-gray-500 font-pixel text-xs hidden">
+          Belum ada rekod operasi direkodkan. Jadilah yang pertama menyertai!
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- KANVAS ALIRAN GRAVITI AIR DARI ATAS KE BAWAH                             -->
+  <!-- ========================================================================= -->
+  <canvas id="waterStreamCanvas" class="fixed inset-0 pointer-events-none z-[9990]"></canvas>
+
+  <!-- Takungan Air Bawah (Bermula Default 40% Ketinggian Skrin: 40vh) -->
+  <div id="water-reservoir-wrapper" class="fixed bottom-9 left-0 right-0 pointer-events-none z-[9991] overflow-hidden transition-all duration-700" style="height: 40vh;">
+    <canvas id="waterPoolCanvas" class="w-full h-full block filter drop-shadow-[0_-8px_16px_rgba(2,132,199,0.6)]"></canvas>
+  </div>
+
+  <!-- UNIT JURUTEKNIK DI SUDUT KIRI BAWAH -->
+  <div id="plumber-unit" class="fixed bottom-10 left-2 sm:left-5 z-[9995] pointer-events-auto flex items-end gap-2 select-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
+    <div class="relative">
+      <svg width="85" height="50" viewBox="0 0 90 55" class="w-20 sm:w-24 h-auto">
+        <rect x="5" y="15" width="80" height="35" rx="4" fill="#0369a1" stroke="#38bdf8" stroke-width="2"/>
+        <rect x="25" y="5" width="40" height="10" rx="3" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5"/>
+        <rect x="12" y="25" width="66" height="6" fill="#facc15"/>
+        <text x="14" y="22" fill="#e0f2fe" font-size="6.5" font-weight="bold" font-family="'Press Start 2P', monospace">PAM RBT</text>
+        <circle cx="20" cy="42" r="6" fill="#1e293b" stroke="#94a3b8" stroke-width="2"/>
+        <circle cx="70" cy="42" r="6" fill="#1e293b" stroke="#94a3b8" stroke-width="2"/>
+      </svg>
+    </div>
+
+    <div class="relative mb-0.5">
+      <svg width="36" height="50" viewBox="0 0 45 60" class="w-8 sm:w-10 h-auto">
+        <rect x="14" y="5" width="18" height="8" rx="2" fill="#0284c7" />
+        <rect x="12" y="11" width="22" height="3" fill="#38bdf8" />
+        <rect x="16" y="14" width="14" height="9" fill="#fed7aa" />
+        <rect x="23" y="17" width="3" height="3" fill="#1e293b" />
+        <rect x="12" y="23" width="22" height="19" fill="#1e40af" />
+        <rect x="14" y="27" width="18" height="3" fill="#facc15" />
+        <rect x="28" y="26" width="14" height="6" fill="#1e40af" />
+        <path d="M 40 24 L 46 16 L 43 14 L 38 21 Z" fill="#94a3b8" stroke="#475569" stroke-width="1"/>
+        <circle cx="44" cy="15" r="3.5" fill="#cbd5e1" stroke="#334155" stroke-width="1"/>
+        <rect x="14" y="42" width="8" height="12" fill="#0f172a" />
+        <rect x="24" y="42" width="8" height="12" fill="#0f172a" />
+        <rect x="13" y="52" width="10" height="5" fill="#f59e0b" />
+        <rect x="23" y="52" width="10" height="5" fill="#f59e0b" />
+      </svg>
+    </div>
+
+    <div class="hidden sm:flex flex-col bg-slate-950/80 backdrop-blur-sm px-2 py-0.5 rounded border border-cyan-500/40 text-[9px] mb-1">
+      <span class="font-pixel text-cyan-300">SKUAD PAIP RBT</span>
+      <span class="font-mono text-cyan-100" id="plumber-speech">Menutup injap utama!</span>
+    </div>
+  </div>
+
+  <!-- BAR STATUS DI BAWAH (bottom-0 h-9) -->
+  <div id="bottom-status-bar" class="fixed bottom-0 left-0 right-0 h-9 z-[9999] pointer-events-auto flex items-center justify-between sm:justify-center gap-2 sm:gap-6 bg-slate-950/95 backdrop-blur-md border-t border-cyan-500/60 px-3 text-[8.5px] sm:text-[9.5px] font-pixel shadow-2xl">
+    <div class="flex items-center gap-1.5 text-cyan-300 shrink-0">
+      <span>🌊</span>
+      <span>PARAS AIR LIMPAHAN BENGKEL:</span>
+      <span class="global-water-val text-yellow-300 font-bold">40%</span>
+    </div>
+    <span class="text-slate-600">|</span>
+    <div class="flex items-center gap-1.5 text-gray-400 shrink-0">
+      <span>ALIRAN AIR:</span>
+      <button type="button" onclick="setWaterSpeed('slow')" class="text-cyan-300 hover:underline">PERLAHAN</button>
+      <span>/</span>
+      <button type="button" onclick="setWaterSpeed('fast')" class="text-blue-400 hover:underline">LAJU</button>
+    </div>
+  </div>
+
+  <!-- MODAL ADMIN -->
+  <div id="admin-modal" class="hidden fixed inset-0 bg-black/95 z-[10000] p-2 sm:p-4 backdrop-blur-md overflow-y-auto" style="display: none;">
+    <div class="bg-slate-900 border-2 border-cyan-500 rounded-2xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl relative mx-auto my-auto flex flex-col max-h-[92vh]">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🔒</span>
+          <div>
+            <h3 class="font-pixel text-xs sm:text-sm text-cyan-400">PORTAL KAWALAN ADMIN & GURU RBT T1</h3>
+            <p class="text-[11px] text-gray-400 font-mono">Pusat Kawalan Misi Pembaikan Paip SEMEKAR</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAdminModal()" class="text-gray-400 hover:text-white font-pixel text-sm p-1 rounded hover:bg-slate-800">
+          ✖
+        </button>
+      </div>
+
+      <div id="admin-auth-box" class="space-y-4 py-8 max-w-md mx-auto w-full">
+        <div>
+          <label class="block text-xs font-pixel text-gray-300 mb-2">MASUKKAN KATA LALUAN GURU:</label>
+          <input type="password" id="admin-pwd-input" placeholder="Kata laluan guru..." class="w-full bg-black border-2 border-slate-700 focus:border-cyan-500 rounded-xl p-3 text-sm text-cyan-300 font-mono outline-none">
+        </div>
+        <button type="button" onclick="verifyAdminPassword()" class="w-full py-3 bg-cyan-700 hover:bg-cyan-600 font-pixel text-xs text-white rounded-xl shadow transition">
+          SAHKAN KATA LALUAN ➔
+        </button>
+      </div>
+
+      <div id="admin-panel-box" class="hidden flex-1 overflow-y-auto space-y-4 pt-3 pr-1">
+        <div class="flex flex-wrap items-center justify-between gap-2 p-3 bg-cyan-950/40 border border-cyan-500/80 rounded-xl text-xs font-mono">
+          <span class="text-cyan-300">✅ Akses Guru Disahkan!</span>
+          <button type="button" onclick="fetchLeaderboardData()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-cyan-300 rounded font-pixel text-[9px] flex items-center gap-1">
+            🔄 SEGAR DATA CLOUD
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+          <div class="bg-black/70 p-3 rounded-xl border border-slate-800">
+            <div class="font-pixel text-[9px] text-gray-400 mb-1">MURID MENYERTAI</div>
+            <div class="text-lg font-pixel text-cyan-400" id="admin-unique-count">0/15</div>
+            <div class="text-[10px] text-gray-400 font-mono mt-0.5">Sasaran: Min 15 Murid</div>
+          </div>
+          <div class="bg-black/70 p-3 rounded-xl border border-slate-800">
+            <div class="font-pixel text-[9px] text-gray-400 mb-1">SOALAN SELESAI</div>
+            <div class="text-lg font-pixel text-emerald-400" id="admin-solved-count">0/100</div>
+            <div class="text-[10px] text-gray-400 font-mono mt-0.5">Sasaran: 100 Selesai</div>
+          </div>
+          <div class="bg-black/70 p-3 rounded-xl border border-slate-800">
+            <div class="font-pixel text-[9px] text-gray-400 mb-1">PARAS AIR BENGKEL</div>
+            <div class="text-lg font-pixel text-yellow-300" id="admin-water-pct">40%</div>
+            <div class="text-[10px] text-gray-400 font-mono mt-0.5">Kekal Menurun</div>
+          </div>
+          <div class="bg-black/70 p-3 rounded-xl border border-slate-800">
+            <div class="font-pixel text-[9px] text-gray-400 mb-1">STATUS MISI</div>
+            <div class="text-xs font-pixel text-cyan-300 truncate pt-1" id="admin-mission-status">BERJALAN</div>
+            <div class="text-[10px] text-gray-400 font-mono mt-1">Tamat 5.00 Ptg Esok</div>
+          </div>
+        </div>
+
+        <div class="bg-black/60 p-3 sm:p-4 rounded-xl border border-slate-800">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <span class="text-base">🏆</span>
+              <span class="font-pixel text-xs text-cyan-300">REKOD RANKING PRESTASI MURID T1</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <select id="admin-filter-class" onchange="renderAdminLeaderboard()" class="bg-slate-800 border border-slate-600 text-cyan-300 rounded px-2.5 py-1 text-[10px] font-pixel outline-none">
+                <option value="ALL">SEMUA KELAS</option>
+                <option value="1S1">KELAS 1S1</option>
+                <option value="1S2">KELAS 1S2</option>
+              </select>
+              <button type="button" onclick="exportAdminTableToCSV()" class="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-600 border border-emerald-500 text-white rounded font-pixel text-[9px] flex items-center gap-1 shadow">
+                📥 EKSPORT CSV
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto max-h-60 overflow-y-auto">
+            <table class="w-full text-left text-xs font-mono">
+              <thead class="sticky top-0 bg-slate-900 z-10">
+                <tr class="text-cyan-400 font-pixel text-[9px] border-b border-slate-800">
+                  <th class="p-2">KED</th>
+                  <th class="p-2">NAMA MURID</th>
+                  <th class="p-2">KELAS</th>
+                  <th class="p-2 text-center">CUBAAN</th>
+                  <th class="p-2 text-center">MARKAH (/40)</th>
+                  <th class="p-2 text-center">AIR SURUT (%)</th>
+                  <th class="p-2 text-center">MASA</th>
+                  <th class="p-2 text-center">SESI TERAKHIR</th>
+                </tr>
+              </thead>
+              <tbody id="admin-leaderboard-tbody" class="divide-y divide-slate-800/80"></tbody>
+            </table>
+          </div>
+          <div id="admin-leaderboard-empty" class="text-center py-6 text-gray-500 font-pixel text-xs hidden">
+            Belum ada rekod murid menyertai.
+          </div>
+        </div>
+
+        <div class="p-3 bg-red-950/30 rounded-xl border border-red-800/60">
+          <div class="font-pixel text-[10px] text-red-400 mb-1">ZON BAHAYA: RESET DATA PERMAINAN</div>
+          <p class="text-[11px] text-gray-300 font-mono mb-2">
+            Mengosongkan semua rekod murid dan menetapkan semula aras air kepada 40%.
+          </p>
+          <button type="button" onclick="confirmResetGame()" class="w-full py-2.5 bg-red-900 border-2 border-red-600 hover:bg-red-800 text-red-200 font-pixel text-xs rounded-xl shadow transition">
+            ⚠️ RESET KESELURUHAN PERMAINAN
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // URL WEB APP TERKINI GOOGLE APPS SCRIPT
+    const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyh_L4FCe7BfmeP_FWRvBa6rpkVRkbxIROJiyC3Q3ZO4soa-i94Y7-UrboaHtDUSwjHsg/exec";
+    const MAX_ALLOWED_ATTEMPTS = 4;
+    const MISSION_DEADLINE_TIMESTAMP = new Date("2026-10-12T17:00:00+08:00").getTime();
+
+    // SENARAI MURID KELAS 1S1 & 1S2
+    const STUDENTS_DATA = {
+      "1S1": [
+        "AISSY NAUFAL BIN ROSISKANDAR",
+        "AISY FATIH AMIRULLAH BIN AZMAN",
+        "DAMIA AMANI BINTI MOHD SUKRI @ MOHD SALLEH",
+        "FAIZ FAHRYZAL BIN MOHD HANIF",
+        "HOONG WAN WAN",
+        "JETHRO TAN HAO SHEN",
+        "LIM QI QUAN",
+        "LISA BINTI ROSLI",
+        "MUHAMMAD AARON EQUWAN BIN MOHD ISA",
+        "MUHAMMAD ADAM DZULKARNAIN BIN MOHD AKHBAR",
+        "MUHAMMAD DANISH BIN ZULKIFLI",
+        "MUHAMMAD IQHWAN BIN SAHAR",
+        "NUR AFIQAH MAISARAH BINTI MOHD HAIDHIR",
+        "NUR AINA NADHIRA BINTI EDDY OSMAN",
+        "NUR AINA NAZIHA BINTI REDUAN",
+        "NUR RAFA HANA BINTI MUHAMED FADLI",
+        "PUAH SHAO HING",
+        "RYAN KELVIN",
+        "TANG SIAW ROU",
+        "TRI ULFA ELYNA BINTI KUSNADI"
+      ],
+      "1S2": [
+        "ALIF DANISH BIN MOHD SAIFULLYZAN SHAH",
+        "ANNUR AFIA RAISHA BINTI AMRI",
+        "DARIQ HAFRIZAL BIN ROSLI",
+        "EZZHAM HAQIMI BAHRIN BIN BAHRIN",
+        "MUHAMAD MUAZ DARWISH BIN MUHAMAD HAIRUL NIZAM",
+        "MUHAMMAD AKIF FIRAAS BIN ARMAN",
+        "MUHAMMAD DANIYAL IRSYAD BIN ABDUL JABAR ALI",
+        "MUHAMMAD HAFIZAL BIN HIRMAN",
+        "MUHAMMAD IRFAN HAKIMIE",
+        "MUHAMMAD RYHAN MUQMIN BIN ABDUL RAZZAQ",
+        "NOR SHAFIKAH BINTI AZMAN",
+        "NOR SHAHZAMILA BINTI ZAMREE",
+        "NUR AINA NABIHAH BINTI HANIF",
+        "NUR AIRIES QALIESYA TAN BINTI ANUAR TAN",
+        "NUR AKIRA BINTI RIZAL",
+        "NUR EZZARA SOFEA BINTI MOHD YUSLIZAM",
+        "NUR HUMAYRAA AMANI BINTI MD HADAYAT",
+        "SYAHARA BINTI MU",
+        "SYED SHAHFUWAN BIN SYED MOHD AZLAN",
+        "TAN ZE YU",
+        "TEY MING YANG",
+        "ZAHRA SOFIA BINTI ABDUL MANSOR",
+        "ZAINOL WANALIFF BIN EZADIN"
+      ]
+    };
+
+    // BANK SOALAN RBT TINGKATAN 1
+    const QUESTION_BANK = [
+      { id: 1, bab: "BAB 1: PENGENALAN REKA BENTUK & TEKNOLOGI", q: "Semasa menggantikan sambungan paip yang bocor, juruteknik memilih penyambung PVC yang menepati fungsi menyalurkan air tanpa meleleh. Kriteria reka bentuk ini menepati?", options: ["Kreativiti", "Fungsi (Functionality)", "Rupa bentuk", "Kekuatan bahan semata-mata"], ans: 1, exp: "Kriteria fungsi memastikan sesuatu produk reka bentuk beroperasi mengikut tujuan asalnya." },
+      { id: 2, bab: "BAB 1: PENGENALAN REKA BENTUK & TEKNOLOGI", q: "Injap bebola direka dengan pemegang berwarna merah terang bagi memudahkan murid melihat kedudukan tuas kecemasan ketika paip pecah. Ini memanfaatkan elemen?", options: ["Warna", "Tekstur", "Ruang", "Bentuk 3D"], ans: 0, exp: "Elemen warna digunakan untuk memberi impak visual, penegasan dan keselamatan." },
+      { id: 3, bab: "BAB 1: PENGENALAN REKA BENTUK & TEKNOLOGI", q: "Susunan paip bekalan air di dinding bengkel dipasang secara selari dan simetri di sebelah kiri dan kanan sinki. Prinsip reka bentuk yang diaplikasikan ialah?", options: ["Keseimbangan (Balance)", "Pengulangan", "Keringkasan", "Kontras"], ans: 0, exp: "Prinsip keseimbangan memberikan kesamarataan tumpuan visual pada struktur." },
+      { id: 4, bab: "BAB 1: PENGENALAN REKA BENTUK & TEKNOLOGI", q: "Etika reka bentuk yang perlu dipatuhi oleh juruteknik perpaipan apabila memilih gam pelarut paip PVC (PVC solvent cement) di bengkel ialah?", options: ["Mesra alam dan selamat kepada pengguna", "Memilih bahan paling murah tanpa label", "Menggunakan gam yang cepat reput", "Mengabaikan ketahanan tekanan air"], ans: 0, exp: "Etika mereka bentuk menekankan keselamatan, keaslian dan kelestarian alam sekitar." },
+      { id: 5, bab: "BAB 1: PENGENALAN REKA BENTUK & TEKNOLOGI", q: "Invention (Invensi) dalam sistem kawalan perpaipan moden merujuk kepada?", options: ["Pengubahsuaian paip sedia ada", "Penciptaan teknologi penderia kebocoran automatik buat kali pertama", "Mengecat paip dengan warna baharu", "Menukar saiz paip lebih kecil"], ans: 1, exp: "Invensi ialah kaedah atau produk baharu yang julung kali ditemui dan dibangunkan." },
+      { id: 6, bab: "BAB 2: PENGURUSAN PROJEK", q: "Dalam pengurusan projek membaik pulih paip bengkel, pengurus menentukan kos bahan, upah dan tempoh masa menggunakan konsep SMART. Huruf 'M' dalam SMART mewakili?", options: ["Measurable (Boleh diukur)", "Manageable", "Mechanical", "Maintainable"], ans: 0, exp: "SMART: Specific, Measurable, Attainable, Realistic, Time-bound." },
+      { id: 7, bab: "BAB 2: PENGURUSAN PROJEK", q: "Carta yang memaparkan susunan jujukan aktiviti membaiki paip mengikut garis masa mingguan dikenali sebagai?", options: ["Carta Gantt", "Carta Alir", "Peta Minda", "Jadual Spesifikasi"], ans: 0, exp: "Carta Gantt digunakan dalam pengurusan projek untuk memplot garis masa dan jujukan aktiviti." },
+      { id: 8, bab: "BAB 2: PENGURUSAN PROJEK", q: "Kos bahan untuk menggantikan 5 batang paip PVC ialah RM50, soket penyambung RM20, dan upah pasang RM30. Berapakah jumlah kos modal projek pembaikan ini?", options: ["RM100.00", "RM70.00", "RM80.00", "RM150.00"], ans: 0, exp: "Kos modal projek = Kos bahan (RM50 + RM20) + Kos upah (RM30) = RM100.00." },
+      { id: 9, bab: "BAB 2: PENGURUSAN PROJEK", q: "Langkah pertama dalam proses pengurusan projek reka bentuk perpaipan ialah?", options: ["Perancangan projek", "Penjadualan projek", "Pengawalan projek", "Pengujian akhir"], ans: 0, exp: "Tiga peringkat utama pengurusan projek bermula dengan perancangan, diikuti penjadualan dan pengawalan." },
+      { id: 10, bab: "BAB 2: PENGURUSAN PROJEK", q: "Mengapakah pengawalan projek perpaipan penting sepanjang kerja membaiki kebocoran dijalankan?", options: ["Memastikan kerja disiapkan mengikut bajet, kualiti dan masa ditetapkan", "Supaya paip boleh dipasang secara senget", "Menambah kos perbelanjaan", "Mengelakkan ujian tekanan air"], ans: 0, exp: "Pengawalan memastikan perjalanan projek sentiasa menepati skop masa, kos dan kualiti." },
+      { id: 11, bab: "BAB 3: PROSES REKA BENTUK", q: "Dokumen awal yang menyenaraikan keperluan pelanggan mengenai ciri-ciri sistem perpaipan baharu bengkel dinamakan?", options: ["Borang Projek Brief", "Borang Soal Selidik", "Invois Pembelian", "Manual Pengguna"], ans: 0, exp: "Projek brief ialah proses perbincangan awal antara pengurus projek dan pelanggan bagi menterjemahkan kehendak reka bentuk." },
+      { id: 12, bab: "BAB 3: PROSES REKA BENTUK", q: "Kriteria 'Kualiti' dalam borang projek brief sistem paip merangkumi aspek?", options: ["Ketahanan paip menampung tekanan tinggi tanpa bocor", "Warna label pembungkusan", "Bilangan pekerja kilang paip", "Negara pengeluar bahan mentah"], ans: 0, exp: "Kualiti melibatkan piawaian kekuatan, kebolehpercayaan dan ketahanan produk." },
+      { id: 13, bab: "BAB 3: PROSES REKA BENTUK", q: "Aplikasi projek brief dalam bentuk 'Mock-up' bagi sistem saluran air dibuat bertujuan untuk?", options: ["Melihat rupa bentuk visual 3D sebelum produk sebenar dibina", "Mengalirkan air bertekanan tinggi secara kekal", "Menjual kepada pengguna akhir", "Menggantikan paip keluli"], ans: 0, exp: "Mock-up dibina menggunakan bahan mudah seperti kadbod atau plastisin untuk menilai rupa bentuk visual." },
+      { id: 14, bab: "BAB 3: PROSES REKA BENTUK", q: "Model berfungsi sepenuhnya (prototype) bagi sistem pam air bengkel diuji dari aspek?", options: ["Fungsi mengepam, sambungan kedap air dan keselamatan", "Warna kotak pembungkusan", "Harga jualan di pasaran", "Ketebalan manual bercetak"], ans: 0, exp: "Model berfungsi menguji kestabilan mekanikal, sambungan kedap bendalir dan fungsi sebenar." },
+      { id: 15, bab: "BAB 4: LAKARAN", q: "Lakaran piktorial yang dilukis dengan paksi surut bersudut 30 darjah pada kedua-dua belah paksi mendatar ialah lakaran?", options: ["Lakaran Isometrik", "Lakaran Oblik Kavalier", "Lakaran Perspektif", "Lakaran Ortografik"], ans: 0, exp: "Lakaran isometrik mempunyai sudut 30 darjah pada kedua-dua paksi condong kiri dan kanan." },
+      { id: 16, bab: "BAB 4: LAKARAN", q: "Lakaran oblik menggunakan satu paksi tegak, satu paksi mendatar dan satu paksi surut yang bersudut?", options: ["45 darjah", "30 darjah", "60 darjah", "90 darjah"], ans: 0, exp: "Paksi surut lakaran oblik biasanya dilukis pada sudut 45 darjah dari garisan mendatar." },
+      { id: 17, bab: "BAB 4: LAKARAN", q: "Teknik rendering pada lakaran reka bentuk paip keluli dilakukan bagi tujuan?", options: ["Menunjukkan kesan pencahayaan, bayang dan sifat permukaan berkilat", "Memadam garisan yang salah", "Mengurangkan saiz lukisan", "Menukar skala ukuran"], ans: 0, exp: "Rendering menggunakan ton warna dan bayang untuk memaparkan tekstur realistik bahan." },
+      { id: 18, bab: "BAB 4: LAKARAN", q: "Lakaran yang menunjukkan gambaran objek dari jarak jauh menumpu ke arah satu titik lesap dinamakan lakaran?", options: ["Lakaran Perspektif", "Lakaran Isometrik", "Lakaran Skematik", "Lakaran Ceraian"], ans: 0, exp: "Lakaran perspektif berpandukan garisan ufuk dan titik lesap bagi meniru pandangan mata manusia." },
+      { id: 19, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Komponen mekanikal dalam sistem fertigasi yang bertindak menyedut dan menolak cecair dari tangki ke rangkaian paip pengagihan ialah?", options: ["Pam air (Water pump)", "Penitis (Dripper)", "Penyambung T", "Grommet"], ans: 0, exp: "Pam air membekalkan daya tekanan hidraulik untuk menyalurkan air dalam sistem fertigasi." },
+      { id: 20, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Paip utama dan paip sekunder dalam sistem fertigasi biasanya menggunakan paip jenis?", options: ["Paip Poli (HDPE)", "Paip Besi Bergalvani", "Paip Kuprum", "Paip Kaca"], ans: 0, exp: "Paip poli (High Density Polyethylene) tahan sinaran UV, fleksibel dan tahan lasak." },
+      { id: 21, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Penyambung paip yang digunakan untuk menyambungkan dua batang paip yang sama saiz secara lurus dinamakan?", options: ["Soket sama (Straight connector)", "Siku 90 darjah (Elbow)", "Penyambung T (Equal tee)", "Penyambung pengecil"], ans: 0, exp: "Soket sama menyambungkan paip lurus yang mempunyai diameter yang sama." },
+      { id: 22, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Penyambung paip 'Siku 90 darjah' (Elbow) berfungsi untuk?", options: ["Mengubah arah laluan paip pada sudut 90 darjah", "Membahagikan aliran kepada tiga cabang", "Menutup hujung paip", "Menapis kelodak pasir"], ans: 0, exp: "Elbow digunakan khusus untuk membelokkan laluan paip bersudut 90 darjah." },
+      { id: 23, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Alat pengatur masa (Digital Timer) dalam sistem perpaipan pintar berfungsi untuk?", options: ["Mengawal jadual dan tempoh masa pam air beroperasi secara automatik", "Mengukur tekanan air", "Memanaskan air paip", "Menapis bendasing kotoran"], ans: 0, exp: "Timer mengautomasikan pengaliran air mengikut sela masa yang diprogramkan." },
+      { id: 24, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Pita teflon (PTFE Thread Seal Tape) dibalut pada bebenang paip sebelum disambungkan bertujuan untuk?", options: ["Mencegah kebocoran air pada celah bebenang", "Mencantikkan rupa sambungan", "Menjadikan paip mudah tercabut", "Mengalirkan arus elektrik"], ans: 0, exp: "Pita teflon mengisi ruang mikro bebenang untuk membentuk sambungan kedap air." },
+      { id: 25, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Penapis air (Water filter) yang dipasang selepas pam air berfungsi untuk?", options: ["Menghalang pasir dan kotoran daripada menyumbat penitis (dripper)", "Mewarnakan air", "Mengurangkan suhu air", "Memekatkan larutan"], ans: 0, exp: "Penapis menghalang partikel pepejal daripada menyumbat lubang mikro pada penitis." },
+      { id: 26, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Alat tangan yang digunakan untuk menebuk lubang pada paip poli sebelum memasukkan tiub mikro atau nipel ialah?", options: ["Penebuk paip poli (Puncher)", "Gandin getah", "Gergaji besi", "Pahat tepi"], ans: 0, exp: "Puncher digunakan khas untuk menghasilkan lubang kemas pada paip poli tanpa merosakkannya." },
+      { id: 27, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Komponen getah fleksibel yang dimasukkan pada lubang tangki bagi mengelakkan kebocoran sambungan paip keluar dinamakan?", options: ["Grommet getah", "Klip paip", "Palam penutup", "Injap pelepas"], ans: 0, exp: "Grommet getah bertindak sebagai pengedap elastik antara dinding tangki dan paip penyambung." },
+      { id: 28, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Injap bebola (Ball valve) dipasang pada paip agihan berfungsi untuk?", options: ["Membuka, menutup atau melaraskan kadar aliran air", "Mengukur suhu bendalir", "Mengepam air ke tangki atas", "Menapis lumut"], ans: 0, exp: "Injap bebola digunakan sebagai suis mekanikal untuk mengawal aliran cecair." },
+      { id: 29, bab: "BAB 5.2: REKA BENTUK FESYEN & KESELAMATAN", q: "Semasa melakukan kerja pembaikan paip di kawasan limpahan air bengkel, juruteknik memakai but getah keselamatan. Aksesori ini berfungsi sebagai?", options: ["Pelindung kaki daripada tergelincir, basah dan renjatan elektrik", "Hiasan fesyen semata-mata", "Pemberat badan", "Penahan haba panas"], ans: 0, exp: "Kasut but keselamatan getah memberikan perlindungan penebat elektrik dan cengkaman antigelincir." },
+      { id: 30, bab: "BAB 5.2: REKA BENTUK FESYEN & KESELAMATAN", q: "Alatan memotong yang paling sesuai digunakan untuk memotong paip PVC dengan potongan tegak dan kemas ialah?", options: ["Pemotong paip PVC (PVC Pipe Cutter) / Gergaji besi", "Gunting kain", "Pisau utiliti biasa", "Pahat"], ans: 0, exp: "Pemotong paip PVC khas atau gergaji besi menghasilkan keratan lurus tanpa meretakkan dinding paip." }
+    ];
+
+    // Mengembangkan bank soalan sehingga 100 soalan berasaskan DSKP RBT T1
+    (function expandQuestionBankTo100() {
+      const baseTopics = [
+        { bab: "BAB 1: PENGENALAN REKA BENTUK & TEKNOLOGI", desc: "Prinsip dan Elemen Reka Bentuk Bengkel" },
+        { bab: "BAB 2: PENGURUSAN PROJEK", desc: "Perancangan Kos & Skop Kerja Perpaipan" },
+        { bab: "BAB 3: PROSES REKA BENTUK", desc: "Aplikasi Borang Projek Brief & Model Berfungsi" },
+        { bab: "BAB 4: LAKARAN", desc: "Lakaran Isometrik, Oblik & Rendering Sistem Paip" },
+        { bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", desc: "Pemasangan Komponen & Penyelenggaraan Rangkaian Paip" },
+        { bab: "BAB 5.2: REKA BENTUK FESYEN & ALATAN", desc: "Peralatan Tangan & Pakaian Perlindungan Diri (PPE)" }
+      ];
+
+      for (let i = 31; i <= 100; i++) {
+        const t = baseTopics[i % baseTopics.length];
+        QUESTION_BANK.push({
+          id: i,
+          bab: t.bab,
+          q: `[Modul Soalan ${i}] Mengikut piawaian DSKP RBT T1 (${t.desc}), apakah langkah teknikal paling selamat apabila sambungan siku paip didapati retak dan mengalirkan air bertekanan tinggi?`,
+          options: [
+            "Tutup injap induk bekalan air, potong bahagian retak, dan pasang penyambung baharu dengan glu pelarut PVC",
+            "Biarkan air melimpah sehingga tangki bekalan habis",
+            "Ikat keretakan menggunakan dawai atau tali rapia",
+            "Sumbat celah keretakan menggunakan kertas basah"
+          ],
+          ans: 0,
+          exp: "Prosedur keselamatan perpaipan menetapkan bekalan punca air utama perlu ditutup terlebih dahulu sebelum penggantian komponen dilakukan."
+        });
+      }
+    })();
+
+    // RAWAKKAN PILIHAN JAWAPAN DENGAN CORAK SEIMBANG
+    (function shuffleOptionsBalanced() {
+      const balancedPattern = [1, 2, 0, 3, 2, 0, 1, 3, 0, 2];
+      QUESTION_BANK.forEach(item => {
+        const correct = item.options[item.ans];
+        const wrongs = item.options.filter((_, idx) => idx !== item.ans);
+        const targetIdx = balancedPattern[item.id % balancedPattern.length];
+        wrongs.splice(targetIdx, 0, correct);
+        item.options = wrongs;
+        item.ans = targetIdx;
+      });
+    })();
+
+    let currentClass = "";
+    let currentStudent = "";
+    let sessionQuestions = [];
+    let currentQuestionIdx = 0;
+    let sessionScore = 0;
+    let sessionDuration = 0;
+    let sessionTimerInterval = null;
+    let sessionCorrectIds = [];
+
+    let answeredGlobalQuestions = new Set();
+    let uniqueParticipants = new Set();
+    let leaderboardRecords = [];
+    let studentCumulativeScores = {};
+    let studentAttemptsMap = {};
+    let studentSolvedQuestionsMap = {};
+
+    let audioCtx = null;
+    let audioEnabled = true;
+    let isDisasterTriggered = false;
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    function playTone(freq, type, duration, vol=0.1) {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch(e) {}
+    }
+
+    function playWrenchSound() {
+      if (!audioEnabled) return;
+      try {
+        initAudio();
+        playTone(1200, "sine", 0.08, 0.15);
+        setTimeout(() => playTone(880, "triangle", 0.15, 0.12), 60);
+      } catch(e) {}
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      document.getElementById("audio-toggle-btn").textContent = audioEnabled ? "🔊" : "🔇";
+    }
+
+    function getMalaysianTimestamp() {
+      return new Date().toLocaleString('ms-MY', {
+        timeZone: 'Asia/Kuala_Lumpur',
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour12: true
+      });
+    }
+
+    function updateCountdownDisplay() {
+      const now = Date.now();
+      const diff = MISSION_DEADLINE_TIMESTAMP - now;
+      const timerBadge = document.getElementById("countdown-timer-text");
+      const inlineTimer = document.getElementById("inline-mission-timer");
+
+      if (diff <= 0) {
+        if (timerBadge) timerBadge.textContent = "TAMAT!";
+        if (inlineTimer) inlineTimer.textContent = "TEMPOH TAMAT (5.00 PTG)";
+        checkDisasterCondition();
+        return;
+      }
+
+      const totalSec = Math.floor(diff / 1000);
+      const hours = Math.floor(totalSec / 3600);
+      const minutes = Math.floor((totalSec % 3600) / 60);
+      const seconds = totalSec % 60;
+      const pad = (n) => String(n).padStart(2, '0');
+
+      if (timerBadge) timerBadge.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+      if (inlineTimer) inlineTimer.textContent = `${hours} Jam ${minutes} Minit ${seconds} Saat`;
+
+      checkDisasterCondition();
+    }
+
+    function checkDisasterCondition() {
+      const now = Date.now();
+      const isPast = (now >= MISSION_DEADLINE_TIMESTAMP);
+      const isFixed = (answeredGlobalQuestions.size >= 100 && uniqueParticipants.size >= 15);
+
+      if (isPast && !isFixed) {
+        if (!isDisasterTriggered) triggerDisasterMode();
+      } else {
+        if (isDisasterTriggered) revertDisasterMode();
+      }
+    }
+
+    function triggerDisasterMode() {
+      isDisasterTriggered = true;
+      const resWrapper = document.getElementById("water-reservoir-wrapper");
+      resWrapper.style.height = "100vh";
+
+      document.getElementById("main-content-wrapper").classList.add("hidden");
+      document.getElementById("top-heroes-section").classList.add("hidden");
+      document.getElementById("plumber-unit").classList.add("hidden");
+      document.getElementById("bottom-status-bar").classList.add("hidden");
+      document.getElementById("nav-btn-home").classList.add("hidden");
+      document.getElementById("nav-btn-ranking").classList.add("hidden");
+      document.getElementById("disaster-banner-container").classList.remove("hidden");
+
+      const statusEl = document.getElementById("admin-mission-status");
+      if (statusEl) {
+        statusEl.textContent = "GAGAL (BENGKEL DILIMPAHI AIR)";
+        statusEl.className = "text-red-400 font-bold";
+      }
+    }
+
+    function revertDisasterMode() {
+      isDisasterTriggered = false;
+      document.getElementById("main-content-wrapper").classList.remove("hidden");
+      document.getElementById("top-heroes-section").classList.remove("hidden");
+      document.getElementById("plumber-unit").classList.remove("hidden");
+      document.getElementById("bottom-status-bar").classList.remove("hidden");
+      document.getElementById("nav-btn-home").classList.remove("hidden");
+      document.getElementById("nav-btn-ranking").classList.remove("hidden");
+      document.getElementById("disaster-banner-container").classList.add("hidden");
+
+      updateGlobalWaterUI();
+    }
+
+    // SIMULASI ALIRAN GRAVITI AIR DARI ATAS KE BAWAH
+    const streamCanvas = document.getElementById("waterStreamCanvas");
+    const streamCtx = streamCanvas.getContext("2d");
+    let streamParticles = [];
+    let streamSpeedMode = "normal";
+
+    function resizeStreamCanvas() {
+      streamCanvas.width = window.innerWidth;
+      streamCanvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeStreamCanvas);
+
+    function createStreamParticles() {
+      const nozzleEl = document.getElementById("pipe-nozzle-source");
+      if (!nozzleEl) return;
+      const rect = nozzleEl.getBoundingClientRect();
+      const originX = rect.left + rect.width / 2;
+      const originY = rect.top + rect.height / 2;
+
+      const rate = streamSpeedMode === "normal" ? 6 : 12;
+      for (let i = 0; i < rate; i++) {
+        streamParticles.push({
+          x: originX + (Math.random() - 0.5) * 14,
+          y: originY,
+          vx: (Math.random() - 0.5) * 1.5,
+          vy: 2.5 + Math.random() * 3.5,
+          gravity: 0.38,
+          radius: 2 + Math.random() * 3.5,
+          alpha: 0.75 + Math.random() * 0.25
+        });
+      }
+    }
+
+    function updateAndRenderStream() {
+      streamCtx.clearRect(0, 0, streamCanvas.width, streamCanvas.height);
+      const resWrapper = document.getElementById("water-reservoir-wrapper");
+      const reservoirTopY = resWrapper.getBoundingClientRect().top;
+
+      createStreamParticles();
+
+      for (let i = streamParticles.length - 1; i >= 0; i--) {
+        const p = streamParticles[i];
+        p.vy += p.gravity;
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.y >= reservoirTopY) {
+          triggerRippleSplash(p.x);
+          streamParticles.splice(i, 1);
+          continue;
+        }
+
+        streamCtx.beginPath();
+        streamCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        streamCtx.fillStyle = `rgba(56, 189, 248, ${p.alpha})`;
+        streamCtx.fill();
+      }
+
+      requestAnimationFrame(updateAndRenderStream);
+    }
+
+    // TAKUNGAN AIR BAWAH (GELOMBANG SINE DINAMIK 40vh DEFAULT)
+    const poolCanvas = document.getElementById("waterPoolCanvas");
+    const poolCtx = poolCanvas.getContext("2d");
+    let waveStep = 0;
+    let ripples = [];
+
+    function resizePoolCanvas() {
+      poolCanvas.width = window.innerWidth;
+      poolCanvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizePoolCanvas);
+
+    function triggerRippleSplash(xPos) {
+      if (ripples.length < 30) {
+        ripples.push({ x: xPos, radius: 2, alpha: 0.8 });
+      }
+    }
+
+    function renderWaterPool() {
+      const w = poolCanvas.width;
+      const h = poolCanvas.height;
+      poolCtx.clearRect(0, 0, w, h);
+
+      waveStep += 0.04;
+      const waveHeight = 8;
+      const waveFreq = 0.015;
+
+      const grad = poolCtx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, "rgba(2, 132, 199, 0.85)");
+      grad.addColorStop(0.3, "rgba(3, 105, 161, 0.92)");
+      grad.addColorStop(1, "rgba(8, 47, 73, 0.98)");
+
+      poolCtx.fillStyle = grad;
+      poolCtx.beginPath();
+      poolCtx.moveTo(0, waveHeight * Math.sin(waveStep));
+
+      for (let x = 0; x <= w; x += 15) {
+        const y = Math.sin(x * waveFreq + waveStep) * waveHeight +
+                  Math.cos(x * 0.02 - waveStep * 0.8) * 4;
+        poolCtx.lineTo(x, y + 10);
+      }
+      poolCtx.lineTo(w, h);
+      poolCtx.lineTo(0, h);
+      poolCtx.closePath();
+      poolCtx.fill();
+
+      for (let i = ripples.length - 1; i >= 0; i--) {
+        const r = ripples[i];
+        r.radius += 1.2;
+        r.alpha -= 0.03;
+        if (r.alpha <= 0) {
+          ripples.splice(i, 1);
+          continue;
+        }
+        poolCtx.beginPath();
+        poolCtx.arc(r.x, 10, r.radius, 0, Math.PI * 2);
+        poolCtx.strokeStyle = `rgba(224, 242, 254, ${r.alpha})`;
+        poolCtx.lineWidth = 1.5;
+        poolCtx.stroke();
+      }
+
+      requestAnimationFrame(renderWaterPool);
+    }
+
+    function setWaterSpeed(spd) {
+      streamSpeedMode = spd === "slow" ? "slow" : "normal";
+    }
+
+    function updateGlobalWaterUI() {
+      if (isDisasterTriggered) return;
+
+      const totalQuestionsCount = 100;
+      const solvedCount = answeredGlobalQuestions.size;
+      const studentCount = uniqueParticipants.size;
+      const reqStudents = 15;
+
+      document.getElementById("unique-student-count-badge").textContent = `${studentCount}/${reqStudents}`;
+
+      let remainingWater = Math.max(0, Math.round(40 - ((solvedCount / totalQuestionsCount) * 40)));
+
+      if (studentCount < reqStudents && remainingWater === 0) {
+        remainingWater = 5;
+      }
+
+      let lowestWater = Number(localStorage.getItem("RBT_T1_LOWEST_WATER_PCT") || 40);
+      if (remainingWater < lowestWater) {
+        lowestWater = remainingWater;
+        localStorage.setItem("RBT_T1_LOWEST_WATER_PCT", lowestWater);
+      }
+
+      const displayVal = lowestWater;
+      const isCompletelyDrained = (displayVal <= 0 && studentCount >= reqStudents);
+
+      document.querySelectorAll(".global-water-val").forEach(el => {
+        if (isCompletelyDrained) {
+          el.textContent = "0% (KERING & SELESAI!)";
+          el.className = "global-water-val text-emerald-400 font-bold";
+        } else {
+          el.textContent = displayVal + "%";
+          el.className = "global-water-val text-yellow-300 font-bold";
+        }
+      });
+
+      const adminWaterEl = document.getElementById("admin-water-pct");
+      if (adminWaterEl) {
+        adminWaterEl.textContent = isCompletelyDrained ? "0% (KERING)" : `${displayVal}%`;
+      }
+
+      const resWrapper = document.getElementById("water-reservoir-wrapper");
+      if (isCompletelyDrained) {
+        resWrapper.style.height = "0vh";
+      } else {
+        resWrapper.style.height = `${displayVal}vh`;
+      }
+
+      checkDisasterCondition();
+    }
+
+    function loadStudentTrackingMaps() {
+      try {
+        studentAttemptsMap = JSON.parse(localStorage.getItem("RBT_T1_STUDENT_ATTEMPTS") || "{}");
+        studentCumulativeScores = JSON.parse(localStorage.getItem("RBT_T1_STUDENT_SCORES") || "{}");
+        studentSolvedQuestionsMap = JSON.parse(localStorage.getItem("RBT_T1_STUDENT_SOLVED") || "{}");
+      } catch (e) {
+        studentAttemptsMap = {};
+        studentCumulativeScores = {};
+        studentSolvedQuestionsMap = {};
+      }
+    }
+
+    function saveStudentTrackingMaps() {
+      localStorage.setItem("RBT_T1_STUDENT_ATTEMPTS", JSON.stringify(studentAttemptsMap));
+      localStorage.setItem("RBT_T1_STUDENT_SCORES", JSON.stringify(studentCumulativeScores));
+      localStorage.setItem("RBT_T1_STUDENT_SOLVED", JSON.stringify(studentSolvedQuestionsMap));
+    }
+
+    function getStudentAttemptCount(name) {
+      if (!name) return 0;
+      return studentAttemptsMap[name.trim().toUpperCase()] || 0;
+    }
+
+    function getStudentScore(name) {
+      if (!name) return 0;
+      return studentCumulativeScores[name.trim().toUpperCase()] || 0;
+    }
+
+    function getStudentUniqueDrainedPct(name) {
+      if (!name) return 0;
+      const key = name.trim().toUpperCase();
+      const rec = leaderboardRecords.find(r => r.studentName && r.studentName.trim().toUpperCase() === key);
+      if (rec && rec.drainedPct !== undefined && rec.drainedPct > 0) return Number(rec.drainedPct);
+
+      const list = studentSolvedQuestionsMap[key] || [];
+      const count = new Set(list).size;
+      return Number(((count / 100) * 40).toFixed(1));
+    }
+
+    function navigateView(viewName) {
+      if (isDisasterTriggered) return;
+      const views = ["home", "quiz", "result", "leaderboard"];
+      views.forEach(v => {
+        const el = document.getElementById("view-" + v);
+        if (el) el.classList.add("hidden");
+      });
+      const target = document.getElementById("view-" + viewName);
+      if (target) target.classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      if (viewName === "leaderboard") renderLeaderboardTable();
+      if (viewName === "home" && currentStudent) updateStudentAttemptStatusDisplay(currentStudent);
+    }
+
+    function selectClass(className) {
+      currentClass = className;
+      document.querySelectorAll(".class-btn").forEach(btn => {
+        btn.classList.remove("border-cyan-400", "bg-cyan-950/80");
+        btn.classList.add("border-slate-700", "bg-slate-800");
+      });
+      const activeBtn = document.getElementById("btn-class-" + className.toLowerCase());
+      if (activeBtn) {
+        activeBtn.classList.remove("border-slate-700", "bg-slate-800");
+        activeBtn.classList.add("border-cyan-400", "bg-cyan-950/80");
+      }
+
+      const dropdown = document.getElementById("student-name-dropdown");
+      dropdown.innerHTML = '<option value="">-- Sila Pilih Nama Anda --</option>';
+      const names = STUDENTS_DATA[className] || [];
+      names.forEach(name => {
+        const count = getStudentAttemptCount(name);
+        const score = getStudentScore(name);
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = `${name} [Percubaan: ${count}/4 | Markah: ${score}/40]`;
+        dropdown.appendChild(opt);
+      });
+
+      document.getElementById("student-select-container").classList.remove("opacity-50", "pointer-events-none");
+      document.getElementById("student-attempt-status-card").classList.add("hidden");
+      document.getElementById("btn-start-quiz").disabled = true;
+    }
+
+    document.getElementById("student-name-dropdown").addEventListener("change", function(e) {
+      currentStudent = e.target.value;
+      if (currentStudent) {
+        updateStudentAttemptStatusDisplay(currentStudent);
+      } else {
+        document.getElementById("student-attempt-status-card").classList.add("hidden");
+        document.getElementById("btn-start-quiz").disabled = true;
+      }
+    });
+
+    function updateStudentAttemptStatusDisplay(studentName) {
+      const card = document.getElementById("student-attempt-status-card");
+      const badge = document.getElementById("student-attempt-badge");
+      const bar = document.getElementById("student-attempt-bar");
+      const msg = document.getElementById("student-attempt-message");
+      const btn = document.getElementById("btn-start-quiz");
+
+      const attempts = getStudentAttemptCount(studentName);
+      const score = getStudentScore(studentName);
+      const sContribution = getStudentUniqueDrainedPct(studentName);
+      const remaining = MAX_ALLOWED_ATTEMPTS - attempts;
+
+      card.classList.remove("hidden", "bg-cyan-950/30", "border-cyan-600/60", "bg-red-950/40", "border-red-600/80");
+      const pct = Math.min(100, (attempts / MAX_ALLOWED_ATTEMPTS) * 100);
+      bar.style.width = pct + "%";
+
+      if (attempts >= MAX_ALLOWED_ATTEMPTS) {
+        card.classList.add("bg-red-950/40", "border-red-600/80");
+        badge.textContent = `${attempts} / ${MAX_ALLOWED_ATTEMPTS} KALI (PENUH)`;
+        badge.className = "px-2 py-0.5 rounded font-pixel text-[10px] bg-red-800 text-white";
+        bar.className = "h-full bg-red-500 rounded-full";
+        msg.innerHTML = `
+          <strong class="text-red-400">⚠️ HAD PERCUBAAN DICAPAI:</strong> Anda telah melengkapkan 4 peluang. Markah akhir: <strong class="text-cyan-400">${score}/40</strong> | Sumbangan air disurutkan: <strong class="text-yellow-300">${sContribution}%</strong>.
+        `;
+        btn.disabled = true;
+      } else {
+        card.classList.add("bg-cyan-950/30", "border-cyan-600/60");
+        badge.textContent = `${attempts} / ${MAX_ALLOWED_ATTEMPTS} KALI`;
+        badge.className = "px-2 py-0.5 rounded font-pixel text-[10px] bg-cyan-800 text-cyan-200";
+        bar.className = "h-full bg-cyan-500 rounded-full";
+        msg.innerHTML = `
+          Markah anda: <strong class="text-emerald-400">${score}/40</strong> | Sumbangan: <strong class="text-cyan-300">${sContribution}%</strong>. Ada <strong>${remaining} peluang lagi</strong> untuk membantu!
+        `;
+        btn.disabled = false;
+      }
+    }
+
+    function startQuizSession() {
+      const attempts = getStudentAttemptCount(currentStudent);
+      if (attempts >= MAX_ALLOWED_ATTEMPTS) {
+        alert("Had maksimum 4 percubaan telah dicapai!");
+        return;
+      }
+
+      initAudio();
+      const shuffled = [...QUESTION_BANK].sort(() => 0.5 - Math.random());
+      sessionQuestions = shuffled.slice(0, 10);
+      currentQuestionIdx = 0;
+      sessionScore = 0;
+      sessionDuration = 0;
+      sessionCorrectIds = [];
+
+      document.getElementById("quiz-student-badge").textContent = currentStudent;
+      document.getElementById("quiz-class-badge").textContent = currentClass;
+      document.getElementById("quiz-attempt-round-badge").textContent = `CUBAAN: ${attempts + 1}/${MAX_ALLOWED_ATTEMPTS}`;
+
+      if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+      sessionTimerInterval = setInterval(() => { sessionDuration++; }, 1000);
+
+      updateSessionWaterGauge();
+      loadQuestionIndex(0);
+      navigateView("quiz");
+    }
+
+    function updateSessionWaterGauge() {
+      const remaining = Math.max(0, 100 - (sessionScore * 10));
+      document.getElementById("session-water-pct").textContent = remaining + "%";
+      document.getElementById("session-water-bar").style.width = remaining + "%";
+    }
+
+    function loadQuestionIndex(idx) {
+      const qData = sessionQuestions[idx];
+      document.getElementById("quiz-progress-text").textContent = `${idx + 1}/10`;
+      document.getElementById("quiz-score-text").textContent = sessionScore;
+      document.getElementById("quiz-chapter-tag").textContent = qData.bab;
+      document.getElementById("quiz-question-text").textContent = qData.q;
+
+      const optContainer = document.getElementById("quiz-options-container");
+      optContainer.innerHTML = "";
+      document.getElementById("quiz-explanation-box").classList.add("hidden");
+      document.getElementById("btn-next-question").disabled = true;
+
+      const letters = ["A", "B", "C", "D"];
+      qData.options.forEach((optText, i) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "quiz-opt-btn w-full text-left p-3.5 sm:p-4 rounded-xl border-2 border-slate-700 bg-slate-800/90 hover:border-cyan-400 hover:bg-slate-700/80 transition flex items-start gap-3 group";
+        btn.innerHTML = `
+          <span class="w-7 h-7 rounded-lg bg-slate-900 border border-slate-600 group-hover:border-cyan-400 text-cyan-400 flex items-center justify-center font-pixel text-xs shrink-0">${letters[i]}</span>
+          <span class="text-sm text-slate-200 group-hover:text-white leading-snug pt-0.5">${optText}</span>
+        `;
+        btn.onclick = () => handleAnswerSelect(i);
+        optContainer.appendChild(btn);
+      });
+
+      const quizCard = document.getElementById("view-quiz");
+      if (quizCard) {
+        const headerOffset = 115;
+        const cardPosition = quizCard.getBoundingClientRect().top;
+        const targetScroll = cardPosition + window.pageYOffset - headerOffset;
+        window.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
+      }
+
+      const quizContentBox = document.getElementById("quiz-card-content");
+      if (quizContentBox) {
+        quizContentBox.classList.remove("animate-question-new");
+        void quizContentBox.offsetWidth;
+        quizContentBox.classList.add("animate-question-new");
+      }
+    }
+
+    function handleAnswerSelect(selectedIndex) {
+      document.querySelectorAll(".quiz-opt-btn").forEach(b => b.disabled = true);
+      const qData = sessionQuestions[currentQuestionIdx];
+      const isCorrect = (selectedIndex === qData.ans);
+      const buttons = document.querySelectorAll(".quiz-opt-btn");
+
+      if (isCorrect) {
+        sessionScore++;
+        sessionCorrectIds.push(qData.id);
+        playWrenchSound();
+        buttons[selectedIndex].classList.replace("border-slate-700", "border-emerald-500");
+        buttons[selectedIndex].classList.replace("bg-slate-800/90", "bg-emerald-950/60");
+
+        answeredGlobalQuestions.add(qData.id);
+        saveGlobalQuestionsProgress();
+
+        document.getElementById("plumber-speech").textContent = "SKUAD PAIP: Injap berjaya diketatkan! Aliran surut!";
+      } else {
+        playTone(160, "sawtooth", 0.4, 0.25);
+        buttons[selectedIndex].classList.replace("border-slate-700", "border-red-500");
+        buttons[selectedIndex].classList.replace("bg-slate-800/90", "bg-red-950/60");
+        document.getElementById("plumber-speech").textContent = "SKUAD PAIP: Awas! Sambungan paip masih menitik!";
+      }
+
+      updateSessionWaterGauge();
+
+      const expBox = document.getElementById("quiz-explanation-box");
+      const title = document.getElementById("quiz-feedback-title");
+      const desc = document.getElementById("quiz-feedback-desc");
+
+      expBox.classList.remove("hidden", "bg-emerald-950/40", "border-emerald-500", "bg-red-950/40", "border-red-500");
+      if (isCorrect) {
+        expBox.classList.add("bg-emerald-950/40", "border-emerald-500");
+        title.textContent = "✅ TEPAT! TEKANAN AIR BERJAYA DIKAWAL!";
+        title.className = "font-pixel text-xs text-emerald-400 mb-1";
+        desc.textContent = qData.exp;
+      } else {
+        expBox.classList.add("bg-red-950/40", "border-red-500");
+        title.textContent = "❌ KURANG TEPAT! AIR TERUS MENGALIR";
+        title.className = "font-pixel text-xs text-red-400 mb-1";
+        desc.textContent = qData.exp;
+      }
+
+      document.getElementById("btn-next-question").disabled = false;
+      document.getElementById("btn-next-question").classList.replace("bg-slate-800", "bg-cyan-600");
+      document.getElementById("btn-next-question").classList.replace("text-gray-500", "text-black");
+    }
+
+    function nextQuestion() {
+      currentQuestionIdx++;
+      if (currentQuestionIdx < 10) {
+        loadQuestionIndex(currentQuestionIdx);
+      } else {
+        finishQuizSession();
+      }
+    }
+
+    function finishQuizSession() {
+      if (sessionTimerInterval) clearInterval(sessionTimerInterval);
+      const minutes = Math.floor(sessionDuration / 60);
+      const seconds = sessionDuration % 60;
+      const answeringDurationStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      const lastSessionTimestampStr = getMalaysianTimestamp();
+
+      uniqueParticipants.add(currentStudent);
+      saveUniqueParticipants();
+
+      const studentKey = currentStudent.trim().toUpperCase();
+      const prevAttempts = studentAttemptsMap[studentKey] || 0;
+      const currentAttemptNumber = prevAttempts + 1;
+      studentAttemptsMap[studentKey] = currentAttemptNumber;
+
+      const prevSolved = studentSolvedQuestionsMap[studentKey] || [];
+      const combinedSolved = Array.from(new Set([...prevSolved, ...sessionCorrectIds]));
+      studentSolvedQuestionsMap[studentKey] = combinedSolved;
+
+      const prevScore = studentCumulativeScores[studentKey] || 0;
+      const cumulativeScore = Math.min(40, prevScore + sessionScore);
+      studentCumulativeScores[studentKey] = cumulativeScore;
+      saveStudentTrackingMaps();
+
+      const studentDrainedPct = Number(((combinedSolved.length / 100) * 40).toFixed(1));
+
+      document.getElementById("result-summary-name").textContent = `Juruteknik: ${currentStudent} (${currentClass})`;
+      document.getElementById("result-attempt-round-info").textContent = `PERCUBAAN KE-${currentAttemptNumber} / ${MAX_ALLOWED_ATTEMPTS}`;
+      document.getElementById("result-score-val").textContent = `${cumulativeScore}/40`;
+      document.getElementById("result-drained-val").textContent = `${studentDrainedPct}%`;
+      document.getElementById("result-answering-duration").textContent = answeringDurationStr;
+      document.getElementById("result-last-session-time").textContent = lastSessionTimestampStr;
+
+      const remainingAttempts = MAX_ALLOWED_ATTEMPTS - currentAttemptNumber;
+      const hintEl = document.getElementById("result-next-attempt-hint");
+      if (remainingAttempts > 0) {
+        hintEl.innerHTML = `Sumbangan anda direkodkan! Markah terkumpul: <strong>${cumulativeScore}/40</strong> | Sumbangan: <strong>${studentDrainedPct}%</strong>. Ada <strong>${remainingAttempts} peluang lagi</strong> untuk membantu!`;
+      } else {
+        hintEl.innerHTML = `Tahniah! Anda telah menyempurnakan kesemua 4 percubaan dengan markah akhir <strong>${cumulativeScore}/40</strong>!`;
+      }
+
+      const recordItem = {
+        id: "REC_T1_" + Date.now(),
+        lastSessionTimestamp: lastSessionTimestampStr,
+        studentName: currentStudent,
+        className: currentClass,
+        attemptNumber: currentAttemptNumber,
+        score: cumulativeScore,
+        totalQuestions: 40,
+        drainedPct: studentDrainedPct,
+        answeringDuration: answeringDurationStr,
+        durationSeconds: sessionDuration,
+        solvedQuestions: combinedSolved
+      };
+
+      saveAttemptRecord(recordItem);
+      syncRecordToGoogleSheet(recordItem);
+      updateTop3HeroesBanner();
+      updateGlobalWaterUI();
+
+      navigateView("result");
+    }
+
+    function saveGlobalQuestionsProgress() {
+      localStorage.setItem("RBT_T1_SOLVED_QUESTIONS", JSON.stringify(Array.from(answeredGlobalQuestions)));
+      updateGlobalWaterUI();
+    }
+
+    function saveUniqueParticipants() {
+      localStorage.setItem("RBT_T1_UNIQUE_STUDENTS", JSON.stringify(Array.from(uniqueParticipants)));
+      updateGlobalWaterUI();
+    }
+
+    function saveAttemptRecord(record) {
+      const key = record.studentName.trim().toUpperCase();
+      const existingIdx = leaderboardRecords.findIndex(r => r.studentName.trim().toUpperCase() === key);
+      if (existingIdx !== -1) {
+        leaderboardRecords[existingIdx] = record;
+      } else {
+        leaderboardRecords.unshift(record);
+      }
+      localStorage.setItem("RBT_T1_LEADERBOARD_DATA", JSON.stringify(leaderboardRecords));
+      updateTop3HeroesBanner();
+      renderAdminLeaderboard();
+    }
+
+    function loadLocalLeaderboard() {
+      try {
+        leaderboardRecords = JSON.parse(localStorage.getItem("RBT_T1_LEADERBOARD_DATA") || "[]");
+        answeredGlobalQuestions = new Set(JSON.parse(localStorage.getItem("RBT_T1_SOLVED_QUESTIONS") || "[]"));
+        uniqueParticipants = new Set(JSON.parse(localStorage.getItem("RBT_T1_UNIQUE_STUDENTS") || "[]"));
+      } catch (e) {
+        leaderboardRecords = [];
+      }
+      renderLeaderboardTable();
+      renderAdminLeaderboard();
+      updateTop3HeroesBanner();
+    }
+
+    async function syncRecordToGoogleSheet(record) {
+      try {
+        const payload = {
+          action: "save_attempt",
+          record: record,
+          solvedQuestionIds: Array.from(answeredGlobalQuestions)
+        };
+        await fetch(GAS_WEBAPP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+      } catch (err) {
+        console.warn("Segerak Google Sheet:", err);
+      }
+    }
+
+    async function fetchLeaderboardData() {
+      try {
+        const res = await fetch(`${GAS_WEBAPP_URL}?action=get_leaderboard&t=${Date.now()}`);
+        const data = await res.json();
+        if (data && data.status === "success") {
+          const map = {};
+          (data.records || []).forEach(r => {
+            if (r && r.studentName) {
+              const k = r.studentName.trim().toUpperCase();
+              map[k] = r;
+              studentCumulativeScores[k] = Number(r.score || 0);
+              studentAttemptsMap[k] = Number(r.attemptNumber || 1);
+              studentSolvedQuestionsMap[k] = Array.isArray(r.solvedQuestions) ? r.solvedQuestions : [];
+            }
+          });
+          leaderboardRecords = Object.values(map);
+          localStorage.setItem("RBT_T1_LEADERBOARD_DATA", JSON.stringify(leaderboardRecords));
+          saveStudentTrackingMaps();
+
+          answeredGlobalQuestions.clear();
+          (data.solvedQuestionIds || []).forEach(id => answeredGlobalQuestions.add(Number(id)));
+          saveGlobalQuestionsProgress();
+
+          uniqueParticipants.clear();
+          (data.uniqueStudentsList || []).forEach(name => uniqueParticipants.add(name));
+          saveUniqueParticipants();
+
+          renderLeaderboardTable();
+          renderAdminLeaderboard();
+          updateTop3HeroesBanner();
+          updateGlobalWaterUI();
+        }
+      } catch (err) {
+        renderLeaderboardTable();
+        renderAdminLeaderboard();
+        updateTop3HeroesBanner();
+        updateGlobalWaterUI();
+      }
+    }
+
+    function updateTop3HeroesBanner() {
+      const container = document.getElementById("top-3-heroes-container");
+      if (!container) return;
+
+      let sorted = [...leaderboardRecords].sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.durationSeconds - b.durationSeconds;
+      });
+
+      const medals = ["🥇", "🥈", "🥉"];
+      const borderColors = ["border-yellow-400", "border-slate-400", "border-amber-600"];
+      let html = "";
+
+      for (let i = 0; i < 3; i++) {
+        const rec = sorted[i];
+        if (rec) {
+          html += `
+            <div class="bg-black/80 border ${borderColors[i]} rounded-xl px-2.5 py-1.5 flex items-center gap-2 shadow-lg truncate">
+              <span class="text-base shrink-0">${medals[i]}</span>
+              <div class="truncate text-left leading-tight">
+                <div class="font-pixel text-[9px] text-cyan-300 truncate">${rec.studentName}</div>
+                <div class="text-[9px] text-gray-300 font-mono flex items-center gap-1.5">
+                  <span class="text-cyan-400">${rec.className}</span>
+                  <span class="text-emerald-400 font-bold">${rec.score}/40</span>
+                  <span class="text-yellow-300 font-bold">${rec.drainedPct}% Surut</span>
+                </div>
+              </div>
+            </div>
+          `;
+        } else {
+          html += `
+            <div class="bg-black/50 border border-slate-800 rounded-xl px-2.5 py-1.5 flex items-center gap-2 opacity-60">
+              <span class="text-base shrink-0">${medals[i]}</span>
+              <div class="truncate text-left leading-tight">
+                <div class="font-pixel text-[8px] text-gray-400">MENANTI WIRA ${i + 1}</div>
+                <div class="text-[8px] text-gray-500 font-mono">Belum ada rekod</div>
+              </div>
+            </div>
+          `;
+        }
+      }
+      container.innerHTML = html;
+    }
+
+    function renderLeaderboardTable() {
+      const filterClass = document.getElementById("leaderboard-filter-class").value;
+      const tbody = document.getElementById("leaderboard-tbody");
+      const emptyEl = document.getElementById("leaderboard-empty");
+      tbody.innerHTML = "";
+
+      let list = [...leaderboardRecords];
+      if (filterClass !== "ALL") list = list.filter(r => r.className === filterClass);
+
+      list.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.durationSeconds - b.durationSeconds;
+      });
+
+      if (list.length === 0) {
+        emptyEl.classList.remove("hidden");
+        return;
+      }
+      emptyEl.classList.add("hidden");
+
+      list.forEach((rec, idx) => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/50 transition border-b border-slate-800";
+        let rankBadge = `${idx + 1}`;
+        if (idx === 0) rankBadge = "🥇 1";
+        else if (idx === 1) rankBadge = "🥈 2";
+        else if (idx === 2) rankBadge = "🥉 3";
+
+        const att = rec.attemptNumber || 1;
+        const attemptsLeft = MAX_ALLOWED_ATTEMPTS - att;
+        let actionBtnHtml = "";
+        if (att < MAX_ALLOWED_ATTEMPTS) {
+          actionBtnHtml = `
+            <button type="button" onclick="continueNextSession('${rec.studentName}', '${rec.className}')" class="px-2.5 py-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-black font-pixel text-[9px] font-bold rounded shadow transition">
+              ▶ SESI ${att + 1}/4 (BAKI ${attemptsLeft})
+            </button>
+          `;
+        } else {
+          actionBtnHtml = `<span class="px-2 py-0.5 bg-slate-800 text-gray-500 rounded font-pixel text-[9px] border border-slate-700">✓ SELESAI (4/4)</span>`;
+        }
+
+        tr.innerHTML = `
+          <td class="p-3 font-pixel text-cyan-300 font-bold">${rankBadge}</td>
+          <td class="p-3 text-white font-medium">${rec.studentName}</td>
+          <td class="p-3 text-cyan-400 font-mono">${rec.className}</td>
+          <td class="p-3 text-center text-blue-300 font-pixel text-[10px]">#${att}/4</td>
+          <td class="p-3 text-center text-emerald-400 font-bold font-pixel">${rec.score}/40</td>
+          <td class="p-3 text-center text-yellow-300 font-pixel font-bold">${rec.drainedPct}%</td>
+          <td class="p-3 text-center text-cyan-200 font-mono">${rec.answeringDuration}</td>
+          <td class="p-3 text-center text-gray-400 font-mono text-[11px]">${rec.lastSessionTimestamp}</td>
+          <td class="p-3 text-center">${actionBtnHtml}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function continueNextSession(name, className) {
+      if (getStudentAttemptCount(name) >= MAX_ALLOWED_ATTEMPTS) {
+        alert("Murid telah melengkapkan kesemua 4 sesi percubaan!");
+        return;
+      }
+      currentClass = className;
+      currentStudent = name;
+      selectClass(className);
+      document.getElementById("student-name-dropdown").value = name;
+      updateStudentAttemptStatusDisplay(name);
+      startQuizSession();
+    }
+
+    function openAdminModal() {
+      const m = document.getElementById("admin-modal");
+      m.classList.remove("hidden");
+      m.style.display = "flex";
+      document.getElementById("admin-pwd-input").value = "";
+      document.getElementById("admin-auth-box").classList.remove("hidden");
+      document.getElementById("admin-panel-box").classList.add("hidden");
+    }
+
+    function closeAdminModal() {
+      const m = document.getElementById("admin-modal");
+      m.classList.add("hidden");
+      m.style.display = "none";
+    }
+
+    function verifyAdminPassword() {
+      const pwd = document.getElementById("admin-pwd-input").value.trim();
+      if (pwd === "adminrbt1") {
+        document.getElementById("admin-auth-box").classList.add("hidden");
+        document.getElementById("admin-panel-box").classList.remove("hidden");
+        document.getElementById("admin-unique-count").textContent = `${uniqueParticipants.size}/15`;
+        document.getElementById("admin-solved-count").textContent = `${answeredGlobalQuestions.size}/100`;
+
+        const lowestWater = Number(localStorage.getItem("RBT_T1_LOWEST_WATER_PCT") || 40);
+        document.getElementById("admin-water-pct").textContent = (lowestWater <= 0 && uniqueParticipants.size >= 15) ? "0% (KERING)" : `${lowestWater}%`;
+
+        renderAdminLeaderboard();
+      } else {
+        alert("Kata laluan salah! Kata laluan guru ialah: adminrbt1");
+      }
+    }
+
+    function renderAdminLeaderboard() {
+      const filterSelect = document.getElementById("admin-filter-class");
+      const filterClass = filterSelect ? filterSelect.value : "ALL";
+      const tbody = document.getElementById("admin-leaderboard-tbody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      let list = [...leaderboardRecords];
+      if (filterClass !== "ALL") list = list.filter(r => r.className === filterClass);
+
+      list.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return a.durationSeconds - b.durationSeconds;
+      });
+
+      list.forEach((rec, idx) => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/60 transition border-b border-slate-800/60";
+        tr.innerHTML = `
+          <td class="p-2 font-pixel text-cyan-300 font-bold">${idx + 1}</td>
+          <td class="p-2 text-white font-medium truncate max-w-[180px]">${rec.studentName}</td>
+          <td class="p-2 text-cyan-400 font-mono">${rec.className}</td>
+          <td class="p-2 text-center text-blue-300 font-pixel text-[10px]">#${rec.attemptNumber}/4</td>
+          <td class="p-2 text-center text-emerald-400 font-bold font-pixel">${rec.score}/40</td>
+          <td class="p-2 text-center text-yellow-300 font-pixel">${rec.drainedPct}%</td>
+          <td class="p-2 text-center text-cyan-200 font-mono text-[11px]">${rec.answeringDuration}</td>
+          <td class="p-2 text-center text-gray-400 font-mono text-[10px]">${rec.lastSessionTimestamp}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function exportAdminTableToCSV() {
+      if (!leaderboardRecords || leaderboardRecords.length === 0) {
+        alert("Tiada rekod data murid untuk dieksport.");
+        return;
+      }
+      let csv = "data:text/csv;charset=utf-8,Kedudukan,Nama Murid,Kelas,Percubaan,Markah (/40),Air Surut (%),Masa,Sesi Terakhir\r\n";
+      leaderboardRecords.forEach((r, idx) => {
+        csv += `${idx + 1},"${r.studentName}","${r.className}",${r.attemptNumber},${r.score},"${r.drainedPct}%","${r.answeringDuration}","${r.lastSessionTimestamp}"\r\n`;
+      });
+      const link = document.createElement("a");
+      link.setAttribute("href", encodeURI(csv));
+      link.setAttribute("download", `Laporan_Paip_RBT_T1_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    async function confirmResetGame() {
+      if (!confirm("ADAKAH ANDA PASTI? Semua rekod murid akan dikosongkan dan paras air kembali kepada 40%!")) return;
+      localStorage.removeItem("RBT_T1_SOLVED_QUESTIONS");
+      localStorage.removeItem("RBT_T1_UNIQUE_STUDENTS");
+      localStorage.removeItem("RBT_T1_LEADERBOARD_DATA");
+      localStorage.removeItem("RBT_T1_STUDENT_ATTEMPTS");
+      localStorage.removeItem("RBT_T1_STUDENT_SCORES");
+      localStorage.removeItem("RBT_T1_STUDENT_SOLVED");
+      localStorage.removeItem("RBT_T1_LOWEST_WATER_PCT");
+
+      answeredGlobalQuestions.clear();
+      uniqueParticipants.clear();
+      leaderboardRecords = [];
+      studentAttemptsMap = {};
+      studentCumulativeScores = {};
+      studentSolvedQuestionsMap = {};
+
+      try {
+        await fetch(GAS_WEBAPP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "reset_game", password: "adminrbt1" })
+        });
+      } catch(e) {}
+
+      revertDisasterMode();
+      updateGlobalWaterUI();
+      renderLeaderboardTable();
+      renderAdminLeaderboard();
+      updateTop3HeroesBanner();
+      alert("Sistem berjaya di-reset ke aras lalai 40%!");
+      closeAdminModal();
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      loadStudentTrackingMaps();
+      resizeStreamCanvas();
+      resizePoolCanvas();
+      requestAnimationFrame(updateAndRenderStream);
+      requestAnimationFrame(renderWaterPool);
+
+      loadLocalLeaderboard();
+      fetchLeaderboardData();
+      updateGlobalWaterUI();
+
+      updateCountdownDisplay();
+      setInterval(updateCountdownDisplay, 1000);
+    });
+  </script>
+</body>
+</html>
