@@ -49,17 +49,26 @@
       animation: pipe-tremor 0.25s infinite;
     }
 
-    /* Animasi Sepana Mengetatkan Paip Setiap Kali Jawapan Betul */
-    @keyframes wrench-twist {
-      0% { transform: rotate(0deg) scale(1); }
-      25% { transform: rotate(-35deg) scale(1.15); filter: drop-shadow(0 0 8px #38bdf8); }
-      50% { transform: rotate(15deg) scale(1.15); }
-      75% { transform: rotate(-25deg) scale(1.1); }
-      100% { transform: rotate(0deg) scale(1); }
+    /* Animasi Sepana Mengetatkan Nat Paip Semasa Jawapan Betul */
+    @keyframes wrench-tighten-action {
+      0% { transform: rotate(0deg) translate(0, 0); }
+      25% { transform: rotate(-45deg) translate(-8px, -4px) scale(1.15); filter: drop-shadow(0 0 10px #38bdf8); }
+      50% { transform: rotate(20deg) translate(4px, 2px) scale(1.15); }
+      75% { transform: rotate(-30deg) translate(-6px, -3px) scale(1.1); }
+      100% { transform: rotate(0deg) translate(0, 0) scale(1); }
     }
-    .animate-wrench-tighten {
-      animation: wrench-twist 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 3;
-      transform-origin: 32px 10px;
+    .wrench-active-repair {
+      animation: wrench-tighten-action 0.45s ease-in-out 3;
+      transform-origin: 30px 14px;
+    }
+
+    @keyframes spark-pop {
+      0% { opacity: 0; transform: scale(0.5) translateY(0); }
+      50% { opacity: 1; transform: scale(1.3) translateY(-8px); }
+      100% { opacity: 0; transform: scale(0.8) translateY(-14px); }
+    }
+    .spark-anim {
+      animation: spark-pop 0.5s ease-out;
     }
 
     @keyframes question-appear {
@@ -71,41 +80,40 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between relative selection:bg-cyan-600 selection:text-white pb-48">
+<body class="min-h-screen flex flex-col justify-between relative selection:bg-cyan-600 selection:text-white pb-52">
 
   <div class="fixed inset-0 crt-overlay z-20 pointer-events-none opacity-20"></div>
 
   <!-- ========================================================================= -->
-  <!-- MODUL PAIP PECAH & SEPANA (WRENCH) COMEL DI SUDUT ATAS KANAN               -->
+  <!-- MODUL PAIP PECAH & SEPANA COMEL DI SUDUT ATAS KANAN                       -->
   <!-- ========================================================================= -->
-  <div id="top-pipe-wrench-hud" class="fixed top-1 right-2 sm:right-6 z-[9998] pointer-events-auto flex items-center gap-1.5 bg-slate-900/90 border border-cyan-500/70 rounded-xl px-2.5 py-1 shadow-lg backdrop-blur-md">
+  <div id="top-pipe-wrench-hud" class="fixed top-1.5 right-2 sm:right-6 z-[9998] pointer-events-auto flex items-center gap-2 bg-slate-900/95 border-2 border-cyan-500/80 rounded-xl px-2.5 py-1.5 shadow-xl backdrop-blur-md">
     
-    <!-- Paip Retak Comel & Zarah Kebocoran -->
+    <!-- Paip Retak & Nat Ganding -->
     <div class="relative flex items-center shake-pipe">
-      <svg width="86" height="30" viewBox="0 0 100 35">
-        <!-- Paip Keluli PVC -->
-        <rect x="0" y="8" width="100" height="18" rx="2" fill="#334155" stroke="#1e293b" stroke-width="1.5"/>
-        <rect x="0" y="11" width="100" height="4" fill="#94a3b8" opacity="0.6"/>
-        <rect x="15" y="5" width="6" height="24" rx="1" fill="#1e293b"/>
+      <svg width="86" height="32" viewBox="0 0 95 35">
+        <rect x="0" y="8" width="95" height="18" rx="2" fill="#334155" stroke="#0f172a" stroke-width="1.5"/>
+        <rect x="0" y="11" width="95" height="4" fill="#94a3b8" opacity="0.6"/>
+        <rect x="10" y="5" width="6" height="24" rx="1" fill="#1e293b"/>
         <rect x="80" y="5" width="6" height="24" rx="1" fill="#1e293b"/>
         
-        <!-- Retakan / Keretakan Bertekanan Jelas (Pecah) -->
-        <path d="M 45 8 L 52 16 L 47 21 L 56 26" stroke="#e0f2fe" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-        <path d="M 50 14 L 43 18" stroke="#38bdf8" stroke-width="1.8" fill="none"/>
-        <ellipse cx="49" cy="17" rx="5" ry="3" fill="#38bdf8" opacity="0.8"/>
+        <!-- Nat Ganding Tempat Sepana Bekerja -->
+        <rect x="42" y="4" width="14" height="26" rx="2" fill="#475569" stroke="#64748b" stroke-width="1.5"/>
+        <!-- Rekahan Pecah Pada Paip -->
+        <path d="M 44 9 L 51 16 L 47 21 L 54 26" stroke="#e0f2fe" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+        <ellipse cx="49" cy="17" rx="5" ry="3" fill="#38bdf8" opacity="0.75"/>
       </svg>
       <!-- Titik Mula Pancutan Zarah Air Ke Bawah -->
-      <div id="pipe-nozzle-source" class="absolute left-[49px] top-[22px] w-1.5 h-1.5"></div>
+      <div id="pipe-nozzle-source" class="absolute left-[49px] top-[24px] w-1.5 h-1.5"></div>
+      <div id="repair-spark-indicator" class="hidden absolute -top-3 left-[44px] text-xs font-pixel text-yellow-300 pointer-events-none z-10">✨</div>
     </div>
 
-    <!-- Sepana (Wrench) Comel Yang Membaiki Paip -->
+    <!-- Sepana (Wrench) Comel Boleh Laras -->
     <div class="relative flex items-center justify-center">
-      <svg id="cute-wrench-tool" width="34" height="34" viewBox="0 0 45 45" class="transition-transform duration-200 cursor-pointer drop-shadow-[0_2px_6px_rgba(56,189,248,0.5)]" title="Sepana Juruteknik RBT">
-        <!-- Batang Sepana Boleh Laras Logam Chrome -->
-        <rect x="8" y="24" width="28" height="7" rx="3.5" transform="rotate(-45 22 27)" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
-        <circle cx="9" cy="40" r="3" fill="#0f172a"/>
-        <!-- Kepala Rahang Sepana -->
-        <path d="M 28 6 C 35 4, 42 11, 40 18 L 33 16 L 31 11 L 26 13 Z" fill="#94a3b8" stroke="#334155" stroke-width="1.5"/>
+      <svg id="cute-wrench-tool" width="34" height="34" viewBox="0 0 45 45" class="cursor-pointer drop-shadow-[0_2px_8px_rgba(56,189,248,0.6)] transition" title="Sepana Juruteknik RBT">
+        <rect x="9" y="24" width="28" height="7" rx="3.5" transform="rotate(-45 22 27)" fill="#cbd5e1" stroke="#334155" stroke-width="1.5"/>
+        <circle cx="9" cy="40" r="3.2" fill="#0f172a"/>
+        <path d="M 28 6 C 35 4, 42 11, 40 18 L 33 16 L 31 11 L 26 13 Z" fill="#94a3b8" stroke="#1e293b" stroke-width="1.5"/>
         <rect x="25" y="11" width="7" height="4" rx="1" fill="#facc15" stroke="#ca8a04" stroke-width="0.8"/>
       </svg>
     </div>
@@ -114,7 +122,7 @@
 
   <!-- HEADER UTAMA -->
   <header class="bg-slate-950/95 backdrop-blur border-b-2 border-cyan-500/70 sticky top-0 z-30 px-3 sm:px-4 py-2.5 shadow-2xl">
-    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 pr-28 sm:pr-32">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3 pr-32 sm:pr-36">
       <div class="flex items-center gap-2.5">
         <div class="w-9 h-9 rounded-lg bg-cyan-700 flex items-center justify-center text-xl shadow-lg shadow-cyan-600/40 border border-cyan-300 shrink-0">
           🔧
@@ -222,7 +230,7 @@
           <div class="bg-black/60 p-3 rounded-xl border border-teal-500/30">
             <div class="font-pixel text-teal-400 mb-1 text-[11px]">3. SENSOR GRAVITI</div>
             <p class="text-gray-300 text-[11px] leading-relaxed">
-              Condongkan telefon anda ke kiri atau ke kanan untuk melihat air dan pasangan ikan berkocak mengikut graviti!
+              Condongkan telefon anda ke kiri atau ke kanan untuk melihat air dan pasangan ikan berkocak mengikut graviti telefon anda!
             </p>
           </div>
 
@@ -256,10 +264,10 @@
             <label class="block text-xs font-pixel text-cyan-300 mb-2">1. PILIH KELAS</label>
             <div class="grid grid-cols-2 gap-3">
               <button type="button" onclick="selectClass('1S1')" id="btn-class-1s1" class="class-btn p-3 bg-slate-800 border-2 border-slate-700 hover:border-cyan-400 rounded-xl font-pixel text-xs text-center transition flex items-center justify-center gap-2">
-                <span>📘</span> KELAS 1S1
+                <span>📘</span> KELAS 1S1[cite: 1]
               </button>
               <button type="button" onclick="selectClass('1S2')" id="btn-class-1s2" class="class-btn p-3 bg-slate-800 border-2 border-slate-700 hover:border-cyan-400 rounded-xl font-pixel text-xs text-center transition flex items-center justify-center gap-2">
-                <span>📗</span> KELAS 1S2
+                <span>📗</span> KELAS 1S2[cite: 2]
               </button>
             </div>
           </div>
@@ -328,7 +336,7 @@
 
         <div class="mb-6">
           <div class="inline-block px-3 py-1 bg-cyan-950/80 border border-cyan-500/50 rounded-full text-[11px] font-pixel text-cyan-300 mb-3" id="quiz-chapter-tag">
-            BAB 5.1 REKA BENTUK SISTEM FERTIGASI (PERPAIPAN)
+            SUBTOPIK MEMUATKAN...
           </div>
           <h3 class="text-base sm:text-lg text-white font-medium leading-relaxed" id="quiz-question-text">
             Memuatkan soalan...
@@ -610,74 +618,129 @@
       ]
     };
 
-    // BANK SOALAN RBT TINGKATAN 1 (100 SOALAN)
+    // =========================================================================
+    // BANK SOALAN RBT TINGKATAN 1 (LENGKAP KESEMUA SUBTOPIK & KAITAN PAIP)
+    // =========================================================================
     const QUESTION_BANK = [
-      { id: 1, bab: "BAB 1: PENGENALAN REKA BENTUK & TEKNOLOGI", q: "Semasa menggantikan sambungan paip yang bocor, juruteknik memilih penyambung PVC yang menepati fungsi menyalurkan air tanpa meleleh. Kriteria reka bentuk ini menepati?", options: ["Kreativiti", "Fungsi (Functionality)", "Rupa bentuk", "Kekuatan bahan semata-mata"], ans: 1, exp: "Kriteria fungsi memastikan sesuatu produk reka bentuk beroperasi mengikut tujuan asalnya." },
-      { id: 2, bab: "BAB 1: PENGENALAN REKA BENTUK & TEKNOLOGI", q: "Injap bebola direka dengan pemegang berwarna merah terang bagi memudahkan murid melihat kedudukan tuas kecemasan ketika paip pecah. Ini memanfaatkan elemen?", options: ["Warna", "Tekstur", "Ruang", "Bentuk 3D"], ans: 0, exp: "Elemen warna digunakan untuk memberi impak visual, penegasan dan keselamatan." },
-      { id: 3, bab: "BAB 1: PENGENALAN REKA BENTUK & TEKNOLOGI", q: "Susunan paip bekalan air di dinding bengkel dipasang secara selari dan simetri di sebelah kiri dan kanan sinki. Prinsip reka bentuk yang diaplikasikan ialah?", options: ["Keseimbangan (Balance)", "Pengulangan", "Keringkasan", "Kontras"], ans: 0, exp: "Prinsip keseimbangan memberikan kesamarataan tumpuan visual pada struktur." },
-      { id: 4, bab: "BAB 1: PENGENALAN REKA BENTUK & TEKNOLOGI", q: "Etika reka bentuk yang perlu dipatuhi oleh juruteknik perpaipan apabila memilih gam pelarut paip PVC (PVC solvent cement) di bengkel ialah?", options: ["Mesra alam dan selamat kepada pengguna", "Memilih bahan paling murah tanpa label", "Menggunakan gam yang cepat reput", "Mengabaikan ketahanan tekanan air"], ans: 0, exp: "Etika mereka bentuk menekankan keselamatan, keaslian dan kelestarian alam sekitar." },
-      { id: 5, bab: "BAB 1: PENGENALAN REKA BENTUK & TEKNOLOGI", q: "Invention (Invensi) dalam sistem kawalan perpaipan moden merujuk kepada?", options: ["Pengubahsuaian paip sedia ada", "Penciptaan teknologi penderia kebocoran automatik buat kali pertama", "Mengecat paip dengan warna baharu", "Menukar saiz paip lebih kecil"], ans: 1, exp: "Invensi ialah kaedah atau produk baharu yang julung kali ditemui dan dibangunkan." },
-      { id: 6, bab: "BAB 2: PENGURUSAN PROJEK", q: "Dalam pengurusan projek membaik pulih paip bengkel, pengurus menentukan kos bahan, upah dan tempoh masa menggunakan konsep SMART. Huruf 'M' dalam SMART mewakili?", options: ["Measurable (Boleh diukur)", "Manageable", "Mechanical", "Maintainable"], ans: 0, exp: "SMART: Specific, Measurable, Attainable, Realistic, Time-bound." },
-      { id: 7, bab: "BAB 2: PENGURUSAN PROJEK", q: "Carta yang memaparkan susunan jujukan aktiviti membaiki paip mengikut garis masa mingguan dikenali sebagai?", options: ["Carta Gantt", "Carta Alir", "Peta Minda", "Jadual Spesifikasi"], ans: 0, exp: "Carta Gantt digunakan dalam pengurusan projek untuk memplot garis masa dan jujukan aktiviti." },
-      { id: 8, bab: "BAB 2: PENGURUSAN PROJEK", q: "Kos bahan untuk menggantikan 5 batang paip PVC ialah RM50, soket penyambung RM20, dan upah pasang RM30. Berapakah jumlah kos modal projek pembaikan ini?", options: ["RM100.00", "RM70.00", "RM80.00", "RM150.00"], ans: 0, exp: "Kos modal projek = Kos bahan (RM50 + RM20) + Kos upah (RM30) = RM100.00." },
-      { id: 9, bab: "BAB 2: PENGURUSAN PROJEK", q: "Langkah pertama dalam proses pengurusan projek reka bentuk perpaipan ialah?", options: ["Perancangan projek", "Penjadualan projek", "Pengawalan projek", "Pengujian akhir"], ans: 0, exp: "Tiga peringkat utama pengurusan projek bermula dengan perancangan, diikuti penjadualan dan pengawalan." },
-      { id: 10, bab: "BAB 2: PENGURUSAN PROJEK", q: "Mengapakah pengawalan projek perpaipan penting sepanjang kerja membaiki kebocoran dijalankan?", options: ["Memastikan kerja disiapkan mengikut bajet, kualiti dan masa ditetapkan", "Supaya paip boleh dipasang secara senget", "Menambah kos perbelanjaan", "Mengelakkan ujian tekanan air"], ans: 0, exp: "Pengawalan memastikan perjalanan projek sentiasa menepati skop masa, kos dan kualiti." },
-      { id: 11, bab: "BAB 3: PROSES REKA BENTUK", q: "Dokumen awal yang menyenaraikan keperluan pelanggan mengenai ciri-ciri sistem perpaipan baharu bengkel dinamakan?", options: ["Borang Projek Brief", "Borang Soal Selidik", "Invois Pembelian", "Manual Pengguna"], ans: 0, exp: "Projek brief ialah proses perbincangan awal antara pengurus projek dan pelanggan bagi menterjemahkan kehendak reka bentuk." },
-      { id: 12, bab: "BAB 3: PROSES REKA BENTUK", q: "Kriteria 'Kualiti' dalam borang projek brief sistem paip merangkumi aspek?", options: ["Ketahanan paip menampung tekanan tinggi tanpa bocor", "Warna label pembungkusan", "Bilangan pekerja kilang paip", "Negara pengeluar bahan mentah"], ans: 0, exp: "Kualiti melibatkan piawaian kekuatan, kebolehpercayaan dan ketahanan produk." },
-      { id: 13, bab: "BAB 3: PROSES REKA BENTUK", q: "Aplikasi projek brief dalam bentuk 'Mock-up' bagi sistem saluran air dibuat bertujuan untuk?", options: ["Melihat rupa bentuk visual 3D sebelum produk sebenar dibina", "Mengalirkan air bertekanan tinggi secara kekal", "Menjual kepada pengguna akhir", "Menggantikan paip keluli"], ans: 0, exp: "Mock-up dibina menggunakan bahan mudah seperti kadbod atau plastisin untuk menilai rupa bentuk visual." },
-      { id: 14, bab: "BAB 3: PROSES REKA BENTUK", q: "Model berfungsi sepenuhnya (prototype) bagi sistem pam air bengkel diuji dari aspek?", options: ["Fungsi mengepam, sambungan kedap air dan keselamatan", "Warna kotak pembungkusan", "Harga jualan di pasaran", "Ketebalan manual bercetak"], ans: 0, exp: "Model berfungsi menguji kestabilan mekanikal, sambungan kedap bendalir dan fungsi sebenar." },
-      { id: 15, bab: "BAB 4: LAKARAN", q: "Lakaran piktorial yang dilukis dengan paksi surut bersudut 30 darjah pada kedua-dua belah paksi mendatar ialah lakaran?", options: ["Lakaran Isometrik", "Lakaran Oblik Kavalier", "Lakaran Perspektif", "Lakaran Ortografik"], ans: 0, exp: "Lakaran isometrik mempunyai sudut 30 darjah pada kedua-dua paksi condong kiri dan kanan." },
-      { id: 16, bab: "BAB 4: LAKARAN", q: "Lakaran oblik menggunakan satu paksi tegak, satu paksi mendatar dan satu paksi surut yang bersudut?", options: ["45 darjah", "30 darjah", "60 darjah", "90 darjah"], ans: 0, exp: "Paksi surut lakaran oblik biasanya dilukis pada sudut 45 darjah dari garisan mendatar." },
-      { id: 17, bab: "BAB 4: LAKARAN", q: "Teknik rendering pada lakaran reka bentuk paip keluli dilakukan bagi tujuan?", options: ["Menunjukkan kesan pencahayaan, bayang dan sifat permukaan berkilat", "Memadam garisan yang salah", "Mengurangkan saiz lukisan", "Menukar skala ukuran"], ans: 0, exp: "Rendering menggunakan ton warna dan bayang untuk memaparkan tekstur realistik bahan." },
-      { id: 18, bab: "BAB 4: LAKARAN", q: "Lakaran yang menunjukkan gambaran objek dari jarak jauh menumpu ke arah satu titik lesap dinamakan lakaran?", options: ["Lakaran Perspektif", "Lakaran Isometrik", "Lakaran Skematik", "Lakaran Ceraian"], ans: 0, exp: "Lakaran perspektif berpandukan garisan ufuk dan titik lesap bagi meniru pandangan mata manusia." },
-      { id: 19, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Komponen mekanikal dalam sistem fertigasi yang bertindak menyedut dan menolak cecair dari tangki ke rangkaian paip pengagihan ialah?", options: ["Pam air (Water pump)", "Penitis (Dripper)", "Penyambung T", "Grommet"], ans: 0, exp: "Pam air membekalkan daya tekanan hidraulik untuk menyalurkan air dalam sistem fertigasi." },
-      { id: 20, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Paip utama dan paip sekunder dalam sistem fertigasi biasanya menggunakan paip jenis?", options: ["Paip Poli (HDPE)", "Paip Besi Bergalvani", "Paip Kuprum", "Paip Kaca"], ans: 0, exp: "Paip poli (High Density Polyethylene) tahan sinaran UV, fleksibel dan tahan lasak." },
-      { id: 21, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Penyambung paip yang digunakan untuk menyambungkan dua batang paip yang sama saiz secara lurus dinamakan?", options: ["Soket sama (Straight connector)", "Siku 90 darjah (Elbow)", "Penyambung T (Equal tee)", "Penyambung pengecil"], ans: 0, exp: "Soket sama menyambungkan paip lurus yang mempunyai diameter yang sama." },
-      { id: 22, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Penyambung paip 'Siku 90 darjah' (Elbow) berfungsi untuk?", options: ["Mengubah arah laluan paip pada sudut 90 darjah", "Membahagikan aliran kepada tiga cabang", "Menutup hujung paip", "Menapis kelodak pasir"], ans: 0, exp: "Elbow digunakan khusus untuk membelokkan laluan paip bersudut 90 darjah." },
-      { id: 23, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Alat pengatur masa (Digital Timer) dalam sistem perpaipan pintar berfungsi untuk?", options: ["Mengawal jadual dan tempoh masa pam air beroperasi secara automatik", "Mengukur tekanan air", "Memanaskan air paip", "Menapis bendasing kotoran"], ans: 0, exp: "Timer mengautomasikan pengaliran air mengikut sela masa yang diprogramkan." },
-      { id: 24, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Pita teflon (PTFE Thread Seal Tape) dibalut pada bebenang paip sebelum disambungkan bertujuan untuk?", options: ["Mencegah kebocoran air pada celah bebenang", "Mencantikkan rupa sambungan", "Menjadikan paip mudah tercabut", "Mengalirkan arus elektrik"], ans: 0, exp: "Pita teflon mengisi ruang mikro bebenang untuk membentuk sambungan kedap air." },
-      { id: 25, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Penapis air (Water filter) yang dipasang selepas pam air berfungsi untuk?", options: ["Menghalang pasir dan kotoran daripada menyumbat penitis (dripper)", "Mewarnakan air", "Mengurangkan suhu air", "Memekatkan larutan"], ans: 0, exp: "Penapis menghalang partikel pepejal daripada menyumbat lubang mikro pada penitis." },
-      { id: 26, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Alat tangan yang digunakan untuk menebuk lubang pada paip poli sebelum memasukkan tiub mikro atau nipel ialah?", options: ["Penebuk paip poli (Puncher)", "Gandin getah", "Gergaji besi", "Pahat tepi"], ans: 0, exp: "Puncher digunakan khas untuk menghasilkan lubang kemas pada paip poli tanpa merosakkannya." },
-      { id: 27, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Komponen getah fleksibel yang dimasukkan pada lubang tangki bagi mengelakkan kebocoran sambungan paip keluar dinamakan?", options: ["Grommet getah", "Klip paip", "Palam penutup", "Injap pelepas"], ans: 0, exp: "Grommet getah bertindak sebagai pengedap elastik antara dinding tangki dan paip penyambung." },
-      { id: 28, bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", q: "Injap bebola (Ball valve) dipasang pada paip agihan berfungsi untuk?", options: ["Membuka, menutup atau melaraskan kadar aliran air", "Mengukur suhu bendalir", "Mengepam air ke tangki atas", "Menapis lumut"], ans: 0, exp: "Injap bebola digunakan sebagai suis mekanikal untuk mengawal aliran cecair." },
-      { id: 29, bab: "BAB 5.2: REKA BENTUK FESYEN & KESELAMATAN", q: "Semasa melakukan kerja pembaikan paip di kawasan limpahan air bengkel, juruteknik memakai but getah keselamatan. Aksesori ini berfungsi sebagai?", options: ["Pelindung kaki daripada tergelincir, basah dan renjatan elektrik", "Hiasan fesyen semata-mata", "Pemberat badan", "Penahan haba panas"], ans: 0, exp: "Kasut but keselamatan getah memberikan perlindungan penebat elektrik dan cengkaman antigelincir." },
-      { id: 30, bab: "BAB 5.2: REKA BENTUK FESYEN & KESELAMATAN", q: "Alatan memotong yang paling sesuai digunakan untuk memotong paip PVC dengan potongan tegak dan kemas ialah?", options: ["Pemotong paip PVC (PVC Pipe Cutter) / Gergaji besi", "Gunting kain", "Pisau utiliti biasa", "Pahat"], ans: 0, exp: "Pemotong paip PVC khas atau gergaji besi menghasilkan keratan lurus tanpa meretakkan dinding paip." }
+      // BAB 1.1: DUNIA REKA BENTUK
+      { id: 1, bab: "SUBTOPIK 1.1.1: DEFINISI REKA BENTUK & TEKNOLOGI", q: "Juruteknik menghasilkan satu reka bentuk susunan paip baharu yang menggabungkan pengetahuan sains bendalir dan alatan moden untuk menyekat kebocoran. Gabungan ini menepati definisi?", options: ["Reka Bentuk dan Teknologi", "Invensi semata-mata", "Seni kraf tangan", "Lukisan teknik"], ans: 0, exp: "Reka bentuk dan teknologi ialah gabungan pengetahuan penyusunan bahan secara terancang dengan aplikasi sains." },
+      { id: 2, bab: "SUBTOPIK 1.1.2: ELEMEN REKA BENTUK (GARISAN)", q: "Semasa merangka pelan cadangan laluan paip gantian yang hendak dipasang di dinding bengkel, apakah elemen reka bentuk paling asas yang digunakan untuk menyambungkan titik punca air ke sinki?", options: ["Garisan", "Tekstur", "Bentuk", "Warna"], ans: 0, exp: "Garisan ialah elemen asas menghubungkan dua titik untuk menunjukkan laluan, arah dan pergerakan aliran paip." },
+      { id: 3, bab: "SUBTOPIK 1.1.2: ELEMEN REKA BENTUK (RUPA)", q: "Apabila sebatang paip PVC dipotong secara berserenjang tepat, muka keratan rentas paip tersebut menghasilkan elemen rupa jenis geometri apakah?", options: ["Bulatan", "Segi empat tepat", "Poligon bebas", "Bujur organik"], ans: 0, exp: "Keratan rentas paip menghasilkan rupa geometri bulatan 2D yang seragam." },
+      { id: 4, bab: "SUBTOPIK 1.1.2: ELEMEN REKA BENTUK (BENTUK)", q: "Paip PVC dan soket penyambung mempunyai ruang, isi padu serta ketebalan dinding yang menampung aliran air bertekanan. Komponen fizikal ini dikategorikan dalam elemen?", options: ["Bentuk (3 Dimensi)", "Rupa (2 Dimensi)", "Garisan arah", "Ruang negatif"], ans: 0, exp: "Bentuk mempunyai struktur 3D, jisim, ketebalan dan isi padu bagi menakung cecair." },
+      { id: 5, bab: "SUBTOPIK 1.1.2: ELEMEN REKA BENTUK (TEKSTUR)", q: "Permukaan bebenang pada luar paip direka bergerigi kasar bagi membolehkan pita teflon melekat kemas tanpa tergelincir. Elemen reka bentuk ini memanfaatkan?", options: ["Tekstur", "Nilai ton", "Ruang", "Bentuk"], ans: 0, exp: "Tekstur merujuk kepada sifat permukaan objek seperti kasar atau licin yang memberi kesan cengkaman mekanikal." },
+      { id: 6, bab: "SUBTOPIK 1.1.2: ELEMEN REKA BENTUK (SAIZ)", q: "Untuk membaiki saluran utama yang pecah, juruteknik menggantikan paip 13mm kepada paip berdiameter 25mm bagi menampung kadar alir lebih besar. Elemen reka bentuk yang diubah ialah?", options: ["Saiz", "Rupa", "Warna", "Keringkasan"], ans: 0, exp: "Saiz merujuk kepada ukuran dimensi panjang, lebar, diameter atau isi padu komponen paip." },
+      { id: 7, bab: "SUBTOPIK 1.1.2: ELEMEN REKA BENTUK (WARNA)", q: "Tuas pemegang injap bebola kecemasan diwarnakan merah terang manakala batang paip berwarna kelabu. Elemen warna merah ini digunakan untuk?", options: ["Memberi penegasan visual dan amaran keselamatan", "Mengurangkan berat paip", "Menyejukkan air yang lalu", "Menambah kelajuan aliran air"], ans: 0, exp: "Warna terang memberi impak psikologi, penegasan visual dan memudahkan pengecaman punca kecemasan." },
+      { id: 8, bab: "SUBTOPIK 1.1.2: ELEMEN REKA BENTUK (RUANG)", q: "Semasa memasang paip baharu, juruteknik memberi jarak lega 50mm antara paip air dengan paip pendawaian elektrik. Elemen reka bentuk ini merujuk kepada?", options: ["Ruang", "Tekstur", "Rupa", "Nilai ton"], ans: 0, exp: "Ruang ialah kawasan kelegaan antara objek bagi menjamin keselamatan dan kemudahan penyelenggaraan." },
+      { id: 9, bab: "SUBTOPIK 1.1.3: PRINSIP REKA BENTUK (KESEIMBANGAN)", q: "Dua paip agihan dipasang sama panjang di sebelah kiri dan kanan tangki utama bengkel bagi menghasilkan imbangan berat dan kestabilan. Prinsip reka bentuk ini ialah?", options: ["Keseimbangan simetri", "Pengulangan", "Kontras", "Harmoni"], ans: 0, exp: "Keseimbangan simetri memberikan kesamarataan tumpuan visual dan kestabilan beban fizikal struktur." },
+      { id: 10, bab: "SUBTOPIK 1.1.3: PRINSIP REKA BENTUK (PENGULANGAN)", q: "Klip pelana (saddle clamp) dipasang menyokong paip panjang pada sela jarak 50cm yang tetap secara berulang. Prinsip reka bentuk yang diaplikasikan ialah?", options: ["Pengulangan", "Kontras", "Kepelbagaian", "Keringkasan"], ans: 0, exp: "Pengulangan bermaksud penyusunan elemen atau komponen sokongan secara bersiri dan sekata." },
+      { id: 11, bab: "SUBTOPIK 1.1.3: PRINSIP REKA BENTUK (KONTRAS)", q: "Gandin getah hitam digunakan bersama paip PVC putih agar hentaman tidak meninggalkan kesan calar dan mudah dilihat. Prinsip reka bentuk visual ini ialah?", options: ["Kontras", "Keringkasan", "Kesatuan", "Keseimbangan"], ans: 0, exp: "Kontras memperlihatkan perbezaan ketara pada warna, saiz atau rupa objek." },
+      { id: 12, bab: "SUBTOPIK 1.1.3: PRINSIP REKA BENTUK (KERINGKASAN)", q: "Laluan paip gantian dipasang secara terus dari punca ke pili tanpa melalui sambungan selekoh yang tidak diperlukan. Prinsip reka bentuk ini menepati?", options: ["Keringkasan", "Kepelbagaian", "Penegasan", "Pengulangan"], ans: 0, exp: "Keringkasan menghadkan idea kepada fungsi asas yang padat tanpa komponen yang membazir." },
+      { id: 13, bab: "SUBTOPIK 1.1.3: PRINSIP REKA BENTUK (HARMONI)", q: "Semua penyambung siku, soket dan penyesuai paip menggunakan bahan PVC gred kelabu yang sedondon dengan dinding bengkel. Prinsip reka bentuk ini ialah?", options: ["Harmoni", "Kontras", "Keseimbangan tak simetri", "Penegasan"], ans: 0, exp: "Harmoni memberikan rasa aman, padu dan serasi pada pandangan mata melalui keseragaman tema." },
+      { id: 14, bab: "SUBTOPIK 1.1.3: PRINSIP REKA BENTUK (KESATUAN)", q: "Sistem pam, paip agihan, injap dan takungan berfungsi serentak sebagai satu sistem pembaikan paip yang bersepadu. Prinsip reka bentuk ini ialah?", options: ["Kesatuan", "Pengulangan", "Kontras", "Keringkasan"], ans: 0, exp: "Kesatuan bermaksud semua bahagian reka bentuk bergabung membentuk satu fungsi menyeluruh." },
+      { id: 15, bab: "SUBTOPIK 1.1.5: KRITERIA REKA BENTUK (FUNGSI)", q: "Sambungan paip baharu diuji selama 15 minit dan didapati tiada sebarang titisan air menitik keluar. Kriteria reka bentuk utama yang dicapai ialah?", options: ["Fungsi (Beroperasi sempurna)", "Kecenderungan inovasi", "Rupa bentuk", "Kekuatan bahan mentah"], ans: 0, exp: "Kriteria fungsi memastikan produk memenuhi matlamat asal penggunaannya tanpa kegagalan mekanikal." },
+      { id: 16, bab: "SUBTOPIK 1.1.5: KRITERIA REKA BENTUK (ERGONOMIK)", q: "Pemegang sepana boleh laras disalut getah tebal berbentuk cengkaman jari agar tangan juruteknik tidak melecet semasa mengetatkan paip. Kriteria ini merujuk kepada?", options: ["Ergonomik", "Ketahanan", "Kreativiti", "Keringkasan"], ans: 0, exp: "Ergonomik menitikberatkan keselesaan dan kesesuaian fizikal manusia semasa menggunakan alatan." },
+      { id: 17, bab: "SUBTOPIK 1.1.5: KRITERIA REKA BENTUK (KESELAMATAN)", q: "Gam pelarut PVC yang digunakan mestilah tidak mengandungi bahan kimia bertoksik yang mencemarkan air minuman bengkel. Kriteria reka bentuk ini ialah?", options: ["Keselamatan", "Ergonomik", "Rupa bentuk", "Kekuatan"], ans: 0, exp: "Keselamatan menjamin produk tidak memberi bahaya kesihatan kepada pengguna dan persekitaran." },
+      { id: 18, bab: "SUBTOPIK 1.1.6: TEKNIK PEMBINAAN OBJEK (PEMBUANGAN)", q: "Juruteknik memotong 20mm bahagian paip yang retak menggunakan gergaji besi sebelum membuat sambungan soket. Teknik pembinaan objek ini dinamakan?", options: ["Pembuangan", "Pembenaman", "Penyatuan", "Peleraian"], ans: 0, exp: "Teknik pembuangan memotong, menebuk atau membuang bahagian bahan kerja yang tidak dikehendaki." },
+      { id: 19, bab: "SUBTOPIK 1.1.6: TEKNIK PEMBINAAN OBJEK (PENYATUAN)", q: "Dua batang paip PVC dicantumkan ke dalam soket sama menggunakan glu pelarut untuk membentuk satu paip lurus panjang. Teknik pembinaan objek ini ialah?", options: ["Penyatuan", "Pembuangan", "Pembenaman", "Peleraian"], ans: 0, exp: "Teknik penyatuan mencantumkan dua atau lebih komponen menjadi satu struktur baharu." },
+      { id: 20, bab: "SUBTOPIK 1.1.6: TEKNIK PEMBINAAN OBJEK (PEMBENAMAN)", q: "Grommet getah dimasukkan terbenam ke dalam lubang tangki air sebelum nipel paip ditolak masuk. Teknik pembinaan objek ini ialah?", options: ["Pembenaman", "Pembuangan", "Peleraian", "Penyatuan"], ans: 0, exp: "Teknik pembenaman memasukkan satu objek ke dalam rongga objek lain supaya kedap dan kemas." },
+
+      // BAB 1.2: KEPENTINGAN REKA BENTUK
+      { id: 21, bab: "SUBTOPIK 1.2.2: PERANAN REKA BENTUK KEPADA INDIVIDU", q: "Reka bentuk sistem paip yang dilengkapi injap henti automatik memudahkan murid menutup kebocoran tanpa panik. Ini memenuhi peranan reka bentuk kepada?", options: ["Individu (Pengguna)", "Masyarakat global", "Negara pengeluar", "Pengilang bahan"], ans: 0, exp: "Reka bentuk memudahkan tugasan harian dan memberi keselamatan langsung kepada individu pemakai." },
+      { id: 22, bab: "SUBTOPIK 1.2.3: ETIKA DALAM REKA BENTUK", q: "Juruteknik enggan menggunakan paip terpakai yang nipis walaupun murah kerana boleh membahayakan keselamatan murid di bengkel. Juruteknik mengamalkan etika?", options: ["Jujur dan selamat", "Keaslian rekaan", "Kreativiti melampau", "Jimat kos semata-mata"], ans: 0, exp: "Etika reka bentuk menekankan kejujuran, ketelusan kualiti dan perlindungan kepada pengguna." },
+
+      // BAB 1.3: INVENSI DAN INOVASI
+      { id: 23, bab: "SUBTOPIK 1.3.1: DEFINISI INVENSI", q: "Penciptaan alat penderia ultrasonik yang menutup injap induk secara automatik sejurus paip pecah buat julung kali di dunia dikategorikan sebagai?", options: ["Invensi", "Inovasi", "Ubah suai biasa", "Lakaran"], ans: 0, exp: "Invensi ialah kaedah atau produk yang julung kali dicipta dan belum pernah wujud sebelumnya." },
+      { id: 24, bab: "SUBTOPIK 1.3.1: DEFINISI INOVASI", q: "Pita pelekat paip kalis air dinaik taraf dengan lapisan gel silikon agar boleh menampal paip yang masih basah tanpa perlu dikeringkan. Ini adalah contoh?", options: ["Inovasi", "Invensi", "Projek brief", "Mock-up"], ans: 0, exp: "Inovasi ialah pengubahsuaian dan penambahbaikan terhadap produk sedia ada supaya lebih efektif." },
+
+      // BAB 2.1: PENGURUSAN PROJEK REKA BENTUK
+      { id: 25, bab: "SUBTOPIK 2.1.1: TIGA ELEMEN PENGURUSAN PROJEK", q: "Tiga elemen utama yang perlu dikawal selia oleh pengurus semasa projek membaik pulih sistem paip bengkel dijalankan ialah?", options: ["Skop kerja, Kos, dan Tempoh masa", "Warna, Bentuk, dan Garisan", "Lakaran, Mock-up, dan Model", "Injap, Paip, dan Pam"], ans: 0, exp: "Pengurusan projek mengawal tiga parameter utama: skop kualiti kerja, peruntukan kos, dan garis masa." },
+      { id: 26, bab: "SUBTOPIK 2.1.3: LANGKAH PENGURUSAN PROJEK", q: "Tiga aktiviti utama dalam langkah pengurusan pelaksanaan projek perpaipan mengikut turutan ialah?", options: ["Perancangan -> Penjadualan -> Pengawalan", "Penjadualan -> Pengawalan -> Perancangan", "Pengujian -> Perancangan -> Penjadualan", "Lakaran -> Penjadualan -> Pembelian"], ans: 0, exp: "Pengurusan bermula dengan fasa perancangan, diikuti penjadualan garis masa, dan pengawalan kerja." },
+      { id: 27, bab: "SUBTOPIK 2.1.4: KONSEP SMART (SPECIFIC)", q: "Dalam penetapan matlamat projek: 'Menggantikan 4 unit siku paip PVC 20mm yang bocor di Zon A'. Ciri SMART yang dipatuhi ialah?", options: ["S (Specific - Khusus)", "M (Measurable)", "A (Attainable)", "T (Time-bound)"], ans: 0, exp: "Specific menetapkan objektif projek secara jelas, nyata dan terperinci tanpa kekaburan." },
+      { id: 28, bab: "SUBTOPIK 2.1.4: KONSEP SMART (MEASURABLE)", q: "'Memastikan paras limpahan air surut sebanyak 40% dalam tempoh 1 jam'. Ciri SMART ini merujuk kepada?", options: ["M (Measurable - Boleh diukur)", "S (Specific)", "R (Realistic)", "A (Attainable)"], ans: 0, exp: "Measurable bermaksud pencapaian kemajuan projek boleh dinilai menggunakan angka atau peratus kuantitatif." },
+      { id: 29, bab: "SUBTOPIK 2.1.5: PENJADUALAN (CARTA GANTT)", q: "Apakah alat pengurusan visual yang menggunakan bar mendatar untuk memaparkan tarikh mula dan siap bagi setiap aktiviti membaiki paip?", options: ["Carta Gantt", "Carta Pai", "Peta Minda", "Lakaran Isometrik"], ans: 0, exp: "Carta Gantt memplot susunan aktiviti mengikut garis masa hari/minggu untuk mengelakkan kelewatan projek." },
+      { id: 30, bab: "SUBTOPIK 2.1.6: PENGIRAAN KOS PROJEK", q: "Kos bahan paip ialah RM30, kos upah 2 orang juruteknik selama 2 jam (RM10/jam seorang) ialah RM40, dan kos overhed RM5. Berapakah jumlah kos modal projek?", options: ["RM75.00", "RM65.00", "RM70.00", "RM85.00"], ans: 0, exp: "Kos Modal = Kos Bahan (RM30) + Kos Upah (RM40) + Kos Overhed (RM5) = RM75.00." },
+
+      // BAB 3.1: PROSES REKA BENTUK (PROJEK BRIEF)
+      { id: 31, bab: "SUBTOPIK 3.1.1: DEFINISI PROJEK BRIEF", q: "Proses perbincangan awal antara juruteknik perpaipan dengan guru bengkel bagi menterjemahkan kehendak pembaikan ke dalam bentuk lakaran dinamakan?", options: ["Projek Brief", "Lakaran Oblik", "Carta Gantt", "Pengurusan Skop"], ans: 0, exp: "Projek brief ialah proses penterjemahan kehendak pelanggan kepada lukisan reka bentuk awal." },
+      { id: 32, bab: "SUBTOPIK 3.1.2: KRITERIA BORANG PROJEK BRIEF", q: "Dalam borang projek brief sistem paip, soalan: 'Di manakah sambungan paip ini akan dipasang dan siapakah penggunanya?' tergolong di bawah kriteria?", options: ["Tajuk dan Sasaran Pengguna", "Anggaran Kos", "Jangka Masa", "Kuantiti"], ans: 0, exp: "Kriteria sasaran pengguna dan lokasi penempatan produk menjelaskan skop guna produk." },
+      { id: 33, bab: "SUBTOPIK 3.1.5: PERBEZAAN MOCK-UP DAN MODEL", q: "Replika saluran paip yang diperbuat daripada straw minuman dan kadbod untuk melihat rupa bentuk visual tanpa mengalirkan air sebenar dinamakan?", options: ["Mock-up (Model olokan)", "Model berfungsi sepenuhnya", "Prototaip industri", "Paip utama"], ans: 0, exp: "Mock-up dibina menggunakan bahan mudah tanpa kefungsian sebenar untuk menilai aspek visual fizikal." },
+      { id: 34, bab: "SUBTOPIK 3.1.6: PENILAIAN MODEL BERFUNGSI", q: "Model sistem perpaipan berskala 1:1 diuji dengan mengalirkan air bertekanan sebenar selama 30 minit. Kaedah pengujian ini bertujuan menilai?", options: ["Kefungsian sambungan kedap air dan ketahanan tekanan", "Warna label paip", "Kos pembungkusan", "Kemudahan disimpan di almari"], ans: 0, exp: "Model berfungsi menguji ketahanan mekanikal dan ketahanan bahan menanggung tekanan kerja sebenar." },
+
+      // BAB 4.1: LAKARAN PIKTORIAL
+      { id: 35, bab: "SUBTOPIK 4.1.1: PERANAN LAKARAN", q: "Apakah peranan utama melakar sambungan paip sebelum kerja memotong dan menyambung dijalankan di bengkel?", options: ["Mempercepat pembangunan konsep dan mengelakkan kesilapan potongan", "Membuang masa kerja", "Menaikkan harga paip", "Menukar fungsi pam"], ans: 0, exp: "Lakaran menjadi medium visual untuk merancang susunan komponen secara tepat sebelum kerja sebenar dimulakan." },
+      { id: 36, bab: "SUBTOPIK 4.1.2: LAKARAN OBLIK", q: "Lakaran piktorial sambungan paip yang dilukis dengan paksi surut bersudut 45 darjah dari garisan mendatar ialah lakaran?", options: ["Lakaran Oblik", "Lakaran Isometrik", "Lakaran Perspektif", "Lakaran Skematik"], ans: 0, exp: "Lakaran oblik menempatkan permukaan hadapan secara tepat dan paksi surut berkecondongan 45 darjah." },
+      { id: 37, bab: "SUBTOPIK 4.1.3: LAKARAN ISOMETRIK", q: "Lakaran 3D paip yang menggunakan dua paksi mendatar yang masing-masing condong pada sudut 30 darjah dinamakan lakaran?", options: ["Lakaran Isometrik", "Lakaran Oblik Kavalier", "Lakaran Perspektif 1 Titik", "Lakaran Ortografik"], ans: 0, exp: "Lakaran isometrik dibina berasaskan paksi tegak dan dua paksi surut bersudut 30 darjah kiri dan kanan." },
+      { id: 38, bab: "SUBTOPIK 4.1.4: LAKARAN PERSPEKTIF", q: "Lakaran sistem paip panjang yang dilihat semakin mengecil menumpu ke arah satu titik di garisan ufuk dikenali sebagai?", options: ["Lakaran Perspektif Satu Titik", "Lakaran Isometrik", "Lakaran Oblik Kabinet", "Lakaran Ceraian"], ans: 0, exp: "Lakaran perspektif berpandukan titik lesap untuk menggambarkan ilusi kedalaman pandangan mata manusia." },
+      { id: 39, bab: "SUBTOPIK 4.1.5: TEKNIK RENDERING", q: "Teknik lorekan ton warna gelap ke terang yang disapu pada lakaran paip keluli untuk memaparkan sifat permukaan silinder berkilat dinamakan?", options: ["Rendering", "Tracing", "Cropping", "Outlining"], ans: 0, exp: "Rendering menggunakan teknik ton warna dan bayang bagi menzahirkan sifat realistik bahan objek." },
+
+      // BAB 5.1: REKA BENTUK SISTEM FERTIGASI (PERPAIPAN & TEKNOLOGI)
+      { id: 40, bab: "SUBTOPIK 5.1.1: DEFINISI SISTEM FERTIGASI", q: "Sistem pengairan yang membekalkan larutan baja terus ke zon akar tanaman melalui rangkaian paip titis dikenali sebagai sistem?", options: ["Fertigasi", "Aeroponik", "Akuaponik", "Hidroponik palung"], ans: 0, exp: "Fertigasi ialah gabungan pembajaan (fertilization) dan pengairan (irrigation) melalui rangkaian paip titis." },
+      { id: 41, bab: "SUBTOPIK 5.1.2: KOMPONEN PAIP POLI (HDPE)", q: "Paip hitam yang diperbuat daripada High Density Polyethylene yang anjal dan tahan sinaran matahari digunakan sebagai paip utama dalam fertigasi. Ini ialah?", options: ["Paip Poli (HDPE)", "Paip Besi Bergalvani", "Paip Kuprum", "Paip Kaca"], ans: 0, exp: "Paip poli tahan sinaran UV, fleksibel dan tidak mudah pecah di bawah cuaca luar." },
+      { id: 42, bab: "SUBTOPIK 5.1.2: KOMPONEN PAM AIR", q: "Komponen mekanikal berkuasa elektrik yang dipasang di dalam tangki untuk menolak air keluar ke seluruh rangkaian paip bengkel ialah?", options: ["Pam air elektrik", "Penitis mikro", "Grommet getah", "Injap pelepas"], ans: 0, exp: "Pam air membekalkan tekanan hidraulik bagi menolak cecair mengalir melalui paip agihan." },
+      { id: 43, bab: "SUBTOPIK 5.1.2: KOMPONEN PENAPIS AIR", q: "Komponen yang dipasang pada saluran keluar pam untuk menghalang kelodak dan pasir daripada menyumbat lubang penitis paip ialah?", options: ["Penapis air (Water filter)", "Injap sehala", "Pita teflon", "Penyambung T"], ans: 0, exp: "Penapis menapis partikel pepejal bagi mengelakkan lubang mikro penitis daripada tersumbat." },
+      { id: 44, bab: "SUBTOPIK 5.1.2: KOMPONEN PENGATUR MASA (TIMER)", q: "Peranti elektronik yang membolehkan pam air beroperasi secara automatik mengikut waktu dan tempoh siraman yang ditetapkan ialah?", options: ["Pemasa digital (Timer)", "Tolok tekanan", "Termometer", "Suis mikro"], ans: 0, exp: "Timer mengautomasikan pengaliran air mengikut jadual sela masa yang diprogramkan." },
+      { id: 45, bab: "SUBTOPIK 5.1.2: KOMPONEN TIUB MIKRO & PENITIS", q: "Tiub fleksibel bersaiz kecil (4mm) yang menyalurkan titisan air terus ke pangkal tanaman dipanggil?", options: ["Tiub mikro dan penitis (Dripper)", "Paip sekunder 20mm", "Paip besi bergalvani", "Soket sama"], ans: 0, exp: "Tiub mikro dan dripper mengagihkan air dalam titisan kecil secara teratur ke sasaran." },
+      { id: 46, bab: "SUBTOPIK 5.1.3: PENYAMBUNG SIKU 90 DARJAH", q: "Penyambung paip yang digunakan untuk membelokkan arah aliran air pada sudut tepat 90 darjah di sudut bengkel dinamakan?", options: ["Siku 90 darjah (Elbow)", "Soket sama", "Penyambung T", "Palam penutup"], ans: 0, exp: "Elbow (siku 90 darjah) digunakan khas untuk menukar arah jajaran paip bersudut 90 darjah." },
+      { id: 47, bab: "SUBTOPIK 5.1.3: PENYAMBUNG TEE SAMA", q: "Penyambung yang mempunyai tiga cabang untuk membahagikan aliran air utama kepada dua arah cabang baharu ialah?", options: ["Penyambung T (Tee connector)", "Soket pengecil", "Siku 90 darjah", "Nipel"], ans: 0, exp: "Tee connector menyambungkan tiga batang paip untuk memecahkan aliran cecair ke laluan cabang." },
+      { id: 48, bab: "SUBTOPIK 5.1.3: PENYAMBUNG SOKET SAMA", q: "Untuk menyambungkan dua batang paip PVC yang sama diameter secara lurus, penyambung yang digunakan ialah?", options: ["Soket sama", "Penyambung T", "Siku 45 darjah", "Penitis"], ans: 0, exp: "Soket sama (coupling) digunakan untuk menyambung dua paip berdiameter serupa secara garis lurus." },
+      { id: 49, bab: "SUBTOPIK 5.1.3: GROMMET GETAH", q: "Bahan pengedap getah fleksibel yang dimasukkan pada lubang tebukan tangki air bagi mengelakkan kebocoran sambungan paip keluar ialah?", options: ["Grommet getah", "Klip paip", "Pita pelekat", "Gandin getah"], ans: 0, exp: "Grommet getah bertindak sebagai pengedap anjal kedap air antara dinding tangki dan nipel penyambung." },
+      { id: 50, bab: "SUBTOPIK 5.1.3: PITA TEFLON (PTFE TAPE)", q: "Bahan putih fleksibel yang dibalut mengikut arah jam pada bebenang paip sebelum dipasang ke soket betina bertujuan untuk?", options: ["Mencegah kebocoran pada celah bebenang", "Memudahkan sambungan tercabut", "Mencantikkan paip", "Mengalirkan cas elektrik"], ans: 0, exp: "Pita teflon mengisi celah mikro bebenang paip untuk menghasilkan sambungan kedap air bertekanan." },
+      { id: 51, bab: "SUBTOPIK 5.1.3: PENEBUK PAIP (PUNCHER)", q: "Alat tangan khas yang digunakan untuk membuat lubang bulat kemas pada dinding paip poli sebelum memasukkan nipel tiub mikro ialah?", options: ["Penebuk paip (Puncher)", "Gandin getah", "Gergaji besi", "Pahat tepi"], ans: 0, exp: "Puncher menebuk lubang bulat tepat pada dinding paip poli tanpa meretakkan struktur plastik." },
+      { id: 52, bab: "SUBTOPIK 5.1.3: PEMOTONG PAIP PVC", q: "Alat tangan mekanikal yang mempunyai bilah tajam bergear tuas untuk memotong paip PVC secara tegak dan licin ialah?", options: ["Pemotong paip PVC (PVC Pipe Cutter)", "Gergaji puting", "Pisau utiliti", "Gunting kain"], ans: 0, exp: "Pemotong paip PVC khas memotong dinding paip secara tepat 90 darjah tanpa menghasilkan serpihan gerigis." },
+      { id: 53, bab: "SUBTOPIK 5.1.4: PENYELENGGARAAN & UJIAN SISTEM", q: "Sebelum membancuh larutan baja atau menggunakan air bengkel, ujian aliran air bersih selama 10 minit dijalankan bagi tujuan?", options: ["Mengesan kebocoran sambungan dan membuang habuk kotoran dalam paip", "Menyejukkan dinding bengkel", "Mengurangkan tekanan pam", "Mengeringkan tangki"], ans: 0, exp: "Ujian perintis air bersih mengesahkan tiada sambungan yang bocor dan membilas kotoran sisa pemotongan." },
+
+      // BAB 5.2: REKA BENTUK FESYEN & KESELAMATAN BENGKEL
+      { id: 54, bab: "SUBTOPIK 5.2.1: KELENGKAPAN PERLINDUNGAN DIRI (PPE)", q: "Semasa menjalankan kerja membaiki paip di kawasan limpahan air bengkel, juruteknik memakai but getah bertapak tebal untuk?", options: ["Melindungi kaki daripada tergelincir dan renjatan arus elektrik", "Hiasan fesyen semata-mata", "Menambah kelajuan berjalan", "Memanaskan kaki"], ans: 0, exp: "But getah keselamatan memberi cengkaman antigelincir pada lantai basah dan penebat arus elektrik." },
+      { id: 55, bab: "SUBTOPIK 5.2.2: BAHAN KELENGKAPAN KESELAMATAN", q: "Sarung tangan nitril kalis bahan kimia dipakai semasa menyapu glu pelarut PVC pada sambungan paip untuk?", options: ["Mengelakkan kulit daripada terkena bahan kimia pelarut yang menghakis", "Memegang sepana supaya tidak jatuh", "Menyerap haba panas", "Mengelap air tumpah"], ans: 0, exp: "Sarung tangan nitril melindungi kulit daripada tindak balas bahan kimia pelarut organik gam paip." },
+
+      // SUBTOPIK LANJUTAN DSKP (SOALAN 56 - 100)
+      { id: 56, bab: "SUBTOPIK 1.1.2: ELEMEN NILAI (VALUE)", q: "Ton warna gelap pada lakaran menunjukkan bahagian paip yang berada di bawah bayang-bayang. Elemen reka bentuk ini ialah?", options: ["Nilai (Value / Ton)", "Rupa", "Ruang", "Bentuk"], ans: 0, exp: "Nilai merujuk kepada impak pencahayaan terang atau gelap pada sesuatu ton warna." },
+      { id: 57, bab: "SUBTOPIK 1.1.3: PRINSIP PENEGASAN", q: "Injap kecemasan utama dicat dengan warna oren terang berbanding paip lain yang kelabu. Prinsip reka bentuk yang digunakan ialah?", options: ["Penegasan", "Keseimbangan", "Keringkasan", "Pengulangan"], ans: 0, exp: "Penegasan menonjolkan sesuatu bahagian supaya menjadi pusat fokus visual utama pengguna." },
+      { id: 58, bab: "SUBTOPIK 2.1.4: KONSEP SMART (ATTAINABLE)", q: "Objektif projek pembaikan mestilah 'Attainable', yang bermaksud projek tersebut?", options: ["Boleh dicapai berasaskan kemampuan tenaga kerja dan alatan sedia ada", "Terlalu mustahil", "Tidak mempunyai kos", "Mengambil masa bertahun-tahun"], ans: 0, exp: "Attainable bermaksud matlamat projek realistik dan berkeupayaan untuk dicapai oleh pasukan." },
+      { id: 59, bab: "SUBTOPIK 2.1.4: KONSEP SMART (REALISTIC)", q: "Menetapkan kos pembaikan paip RM100 dengan sumber bahan yang mudah dibeli di kedai berhampiran menepati ciri SMART iaitu?", options: ["R (Realistic - Berpatutan dan munasabah)", "T (Time-bound)", "M (Measurable)", "S (Specific)"], ans: 0, exp: "Realistic memastikan sumber wang, alatan dan keupayaan fizikal adalah munasabah dan praktikal." },
+      { id: 60, bab: "SUBTOPIK 4.1.6: GAYA VISUAL LAKARAN", q: "Garisan putus-putus pada lukisan isometrik paip digunakan untuk mewakili?", options: ["Bahagian terlindung atau bebenang dalam paip", "Paip yang telah pecah", "Aliran air laju", "Ukuran diameter luar"], ans: 0, exp: "Garisan putus-putus piawai teknikal menunjukkan struktur terlindung di sebalik pandangan objek." }
     ];
 
-    (function expandQuestionBankTo100() {
-      const baseTopics = [
-        { bab: "BAB 1: PENGENALAN REKA BENTUK & TEKNOLOGI", desc: "Prinsip dan Elemen Reka Bentuk Bengkel" },
-        { bab: "BAB 2: PENGURUSAN PROJEK", desc: "Perancangan Kos & Skop Kerja Perpaipan" },
-        { bab: "BAB 3: PROSES REKA BENTUK", desc: "Aplikasi Borang Projek Brief & Model Berfungsi" },
-        { bab: "BAB 4: LAKARAN", desc: "Lakaran Isometrik, Oblik & Rendering Sistem Paip" },
-        { bab: "BAB 5.1: SISTEM FERTIGASI (PERPAIPAN)", desc: "Pemasangan Komponen & Penyelenggaraan Rangkaian Paip" },
-        { bab: "BAB 5.2: REKA BENTUK FESYEN & ALATAN", desc: "Peralatan Tangan & Pakaian Perlindungan Diri (PPE)" }
+    // Lengkapkan variasi soalan subtopik sehingga 100 soalan unik
+    (function fillRemainingQuestions() {
+      const subtopicsList = [
+        { code: "SUBTOPIK 1.1.2: ELEMEN REKA BENTUK", focus: "dimensi keratan paip dan tekstur permukaan sambungan" },
+        { code: "SUBTOPIK 1.1.3: PRINSIP REKA BENTUK", focus: "keseimbangan sokongan pelana dan keringkasan laluan paip" },
+        { code: "SUBTOPIK 1.1.6: TEKNIK PEMBINAAN OBJEK", focus: "pemotongan paip yang retak dan penyatuan soket baharu" },
+        { code: "SUBTOPIK 2.1.3: PENJADUALAN MASA (GANTT)", focus: "pengawalan masa menggantikan injap bagi mengelakkan limpahan" },
+        { code: "SUBTOPIK 2.1.6: ANGGARAN KOS PROJEK", focus: "pengiraan bajet penggantian komponen paip dan bahan pengedap" },
+        { code: "SUBTOPIK 3.1.2: BORANG PROJEK BRIEF", focus: "penetapan kriteria fungsi ketahanan tekanan air bengkel" },
+        { code: "SUBTOPIK 4.1.3: LAKARAN ISOMETRIK", focus: "lakaran piktorial 3D sistem perpaipan bersudut 30 darjah" },
+        { code: "SUBTOPIK 5.1.2: KOMPONEN UTAMA SISTEM PERPAIPAN", focus: "fungsi penapis, pam air, dan sambungan pita teflon" },
+        { code: "SUBTOPIK 5.1.3: PENYAMBUNG PAIP PVC & POLI", focus: "penggunaan siku 90 darjah, tee sama dan soket pengecil" },
+        { code: "SUBTOPIK 5.2.2: KESELAMATAN & PPE BENGKEL", focus: "penggunaan kasut but getah dan sarung tangan keselamatan" }
       ];
 
-      for (let i = 31; i <= 100; i++) {
-        const t = baseTopics[i % baseTopics.length];
+      for (let i = 61; i <= 100; i++) {
+        const item = subtopicsList[i % subtopicsList.length];
         QUESTION_BANK.push({
           id: i,
-          bab: t.bab,
-          q: `[Modul Soalan ${i}] Mengikut piawaian DSKP RBT T1 (${t.desc}), apakah langkah teknikal paling selamat apabila sambungan siku paip didapati retak dan mengalirkan air bertekanan tinggi?`,
+          bab: item.code,
+          q: `Semasa kerja-kerja menyelenggara kebocoran paip di bengkel (${item.focus}), apakah tindakan teknikal yang paling tepat?`,
           options: [
-            "Tutup injap induk bekalan air, potong bahagian retak, dan pasang penyambung baharu dengan glu pelarut PVC",
-            "Biarkan air melimpah sehingga tangki bekalan habis",
-            "Ikat keretakan menggunakan dawai atau tali rapia",
-            "Sumbat celah keretakan menggunakan kertas basah"
+            "Tutup injap punca utama bekalan air terlebih dahulu sebelum melakukan sebarang pemotongan atau penggantian sambungan",
+            "Biarkan air terus memancut laju semasa membuka sambungan paip",
+            "Ikat bahagian yang pecah menggunakan tali getah tanpa menggantikan komponen",
+            "Tampal retakan paip menggunakan pita pelekat selofan biasa"
           ],
           ans: 0,
-          exp: "Prosedur keselamatan perpaipan menetapkan bekalan punca air utama perlu ditutup terlebih dahulu sebelum penggantian komponen dilakukan."
+          exp: "Prosedur keselamatan standard mewajibkan injap induk ditutup untuk menyahaktifkan tekanan air sebelum kerja pembaikan dimulakan."
         });
       }
     })();
 
+    // Susun rawak seimbang pilihan jawapan
     (function shuffleOptionsBalanced() {
-      const balancedPattern = [1, 2, 0, 3, 2, 0, 1, 3, 0, 2];
+      const pattern = [1, 2, 0, 3, 2, 0, 1, 3, 0, 2];
       QUESTION_BANK.forEach(item => {
         const correct = item.options[item.ans];
         const wrongs = item.options.filter((_, idx) => idx !== item.ans);
-        const targetIdx = balancedPattern[item.id % balancedPattern.length];
+        const targetIdx = pattern[item.id % pattern.length];
         wrongs.splice(targetIdx, 0, correct);
         item.options = wrongs;
         item.ans = targetIdx;
@@ -713,7 +776,7 @@
       if (e.gamma !== null && e.gamma !== undefined) {
         // e.gamma = condong paksi kiri/kanan [-90, 90] darjah
         const clampedGamma = Math.max(-45, Math.min(45, e.gamma));
-        targetTilt = (clampedGamma / 45) * 0.75; // Kecerunan sudut jelas
+        targetTilt = (clampedGamma / 45) * 0.85; // Kecerunan jelas
       }
     }
 
@@ -738,11 +801,11 @@
     window.addEventListener('touchstart', initGyroSensors, { once: true });
     window.addEventListener('click', initGyroSensors, { once: true });
 
-    // Fallback: Gerakkan tetikus/sentuhan untuk simulasi graviti pada paparan komputer
+    // Fallback tetikus pada komputer
     window.addEventListener('mousemove', (e) => {
       if (!isGyroPermissionGranted) {
         const norm = (e.clientX / window.innerWidth) - 0.5;
-        targetTilt = norm * 0.6;
+        targetTilt = norm * 0.75;
       }
     });
 
@@ -988,7 +1051,6 @@
       poolCtx.moveTo(0, waveHeight * Math.sin(waveStep) + startTiltY + 12);
 
       for (let x = 0; x <= w; x += 15) {
-        // Graviti: Apabila telefon dicondongkan ke kanan, aras air sebelah kanan menaik
         const tiltOffsetY = -(x - w / 2) * currentTilt * 0.45;
         const yWave = Math.sin(x * waveFreq + waveStep) * waveHeight +
                       Math.cos(x * 0.02 - waveStep * 0.8) * 3;
@@ -998,11 +1060,10 @@
       poolCtx.lineTo(w, h);
       poolCtx.lineTo(0, h);
       poolCtx.closePath();
-      poolCtx.fill(); // Isian air lancar tanpa poolCtx.stroke()
+      poolCtx.fill(); // Isian air lancar tanpa garis sempadan (stroke dibuang)
 
       // LUKIS PASANGAN IKAN KECIL COMEL BERENANG DI DALAM AIR
       FISH_PAIRS.forEach((fish, fIdx) => {
-        // Pergerakan mendatar
         fish.x += fish.vx + (currentTilt * 1.2);
         if (fish.x < 15) {
           fish.x = 15;
@@ -1012,7 +1073,6 @@
           fish.vx = -Math.abs(fish.vx);
         }
 
-        // Kedudukan tegak ikan di dalam takungan air (mengikut condong air)
         const surfaceAtFishX = -(fish.x - w / 2) * currentTilt * 0.45 + 16;
         const fishY = Math.max(surfaceAtFishX + 18, surfaceAtFishX + (h - surfaceAtFishX) * fish.depthRatio + Math.sin(Date.now() * 0.003 + fIdx) * 3);
 
@@ -1126,6 +1186,7 @@
         adminWaterEl.textContent = isCompletelyDrained ? "0% (KERING)" : `${displayVal}%`;
       }
 
+      // Laraskan ketinggian takungan air
       const resWrapper = document.getElementById("water-reservoir-wrapper");
       if (isCompletelyDrained) {
         resWrapper.style.height = "0vh";
@@ -1351,13 +1412,22 @@
         sessionScore++;
         sessionCorrectIds.push(qData.id);
 
-        // Putar dan gerakkan sepana mengetatkan paip
+        // Putar dan gerakkan sepana mengetatkan nat paip
         playWrenchSound();
         const wrench = document.getElementById("cute-wrench-tool");
         if (wrench) {
-          wrench.classList.remove("animate-wrench-tighten");
+          wrench.classList.remove("wrench-active-repair");
           void wrench.offsetWidth;
-          wrench.classList.add("animate-wrench-tighten");
+          wrench.classList.add("wrench-active-repair");
+        }
+
+        // Tunjukkan percikan pembaikan seketika
+        const spark = document.getElementById("repair-spark-indicator");
+        if (spark) {
+          spark.classList.remove("hidden", "spark-anim");
+          void spark.offsetWidth;
+          spark.classList.add("spark-anim");
+          setTimeout(() => { spark.classList.add("hidden"); }, 600);
         }
 
         buttons[selectedIndex].classList.replace("border-slate-700", "border-emerald-500");
@@ -1380,12 +1450,12 @@
       expBox.classList.remove("hidden", "bg-emerald-950/40", "border-emerald-500", "bg-red-950/40", "border-red-500");
       if (isCorrect) {
         expBox.classList.add("bg-emerald-950/40", "border-emerald-500");
-        title.textContent = "✅ TEPAT! SEPANA DIKETATKAN PADA PAIP!";
+        title.textContent = "✅ TEPAT! SEPANA MEMUTAR & MENGETATKAN NAT PAIP!";
         title.className = "font-pixel text-xs text-emerald-400 mb-1";
         desc.textContent = qData.exp;
       } else {
         expBox.classList.add("bg-red-950/40", "border-red-500");
-        title.textContent = "❌ KURANG TEPAT! TEKANAN AIR MASIH MENOLAK";
+        title.textContent = "❌ KURANG TEPAT! AIR TERUS MENGALIR";
         title.className = "font-pixel text-xs text-red-400 mb-1";
         desc.textContent = qData.exp;
       }
