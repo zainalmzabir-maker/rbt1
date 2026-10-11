@@ -40,28 +40,20 @@
     ::-webkit-scrollbar-thumb { background: #0284c7; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
 
-    @keyframes water-pulse {
-      0%, 100% { filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.7)); }
-      50% { filter: drop-shadow(0 0 4px rgba(14, 165, 233, 0.4)); }
-    }
-    .water-alarm-active {
-      animation: water-pulse 1s infinite;
-    }
-
     @keyframes pipe-shake {
       0%, 100% { transform: translateY(0) rotate(0deg); }
-      25% { transform: translateY(-1px) rotate(-0.5deg); }
-      75% { transform: translateY(1px) rotate(0.5deg); }
+      25% { transform: translateY(-0.8px) rotate(-0.4deg); }
+      75% { transform: translateY(0.8px) rotate(0.4deg); }
     }
     .shake-pipe {
-      animation: pipe-shake 0.25s infinite;
+      animation: pipe-shake 0.2s infinite;
     }
 
     @keyframes question-appear {
       0% {
         opacity: 0;
-        transform: translateY(-12px) scale(0.98);
-        filter: brightness(1.5);
+        transform: translateY(-10px) scale(0.98);
+        filter: brightness(1.4);
       }
       100% {
         opacity: 1;
@@ -70,48 +62,33 @@
       }
     }
     .animate-question-new {
-      animation: question-appear 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: question-appear 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between relative selection:bg-cyan-600 selection:text-white pb-52">
 
-  <div class="fixed inset-0 crt-overlay z-20 pointer-events-none opacity-25"></div>
+  <div class="fixed inset-0 crt-overlay z-20 pointer-events-none opacity-20"></div>
 
-  <!-- KAWASAN PAIP PECAH & BOCOR DI ATAS SKRIN -->
-  <div id="top-leaking-pipe-wrapper" class="fixed top-0 left-0 right-0 z-40 pointer-events-none flex justify-center">
-    <div class="relative w-full max-w-5xl px-4 flex items-center justify-between">
-      
-      <!-- Batang Paip Utama & Flange -->
-      <div class="relative flex items-center">
-        <svg width="220" height="70" viewBox="0 0 220 70" class="drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)] shake-pipe">
-          <rect x="0" y="10" width="160" height="24" fill="#475569" stroke="#1e293b" stroke-width="2"/>
-          <rect x="0" y="14" width="160" height="6" fill="#94a3b8" opacity="0.6"/>
-          <rect x="40" y="6" width="12" height="32" rx="2" fill="#334155" stroke="#0f172a" stroke-width="2"/>
-          <rect x="110" y="6" width="12" height="32" rx="2" fill="#334155" stroke="#0f172a" stroke-width="2"/>
-          <path d="M 160 10 L 195 10 A 10 10 0 0 1 205 20 L 205 55 L 180 55 L 180 34 L 160 34 Z" fill="#475569" stroke="#1e293b" stroke-width="2"/>
-          <ellipse cx="192.5" cy="55" rx="12.5" ry="4" fill="#0284c7" stroke="#38bdf8" stroke-width="1.5"/>
-          <path d="M 175 22 L 183 26 L 179 30 L 188 33" stroke="#e0f2fe" stroke-width="2" fill="none"/>
-        </svg>
-
-        <!-- Titik Pancutan Air Dari Mulut Paip -->
-        <div id="pipe-nozzle-source" class="absolute left-[192px] top-[55px] w-2 h-2"></div>
-      </div>
-
-      <!-- Tolok Tekanan Air -->
-      <div class="hidden sm:flex items-center gap-2 bg-slate-900/90 border-2 border-cyan-500/80 rounded-xl px-3 py-1.5 shadow-lg backdrop-blur-md">
-        <span class="text-xl">🚰</span>
-        <div>
-          <div class="text-[9px] font-pixel text-cyan-400">TEKANAN PAIP:</div>
-          <div id="pipe-pressure-text" class="text-xs font-pixel text-red-400 animate-pulse">KRITIKAL (8.5 BAR)</div>
-        </div>
-      </div>
-
+  <!-- VISUAL PAIP PECAH & RETAK DI SUDUT ATAS KANAN (TIDAK MENGHALANG NAV/KANDUNGAN) -->
+  <div id="top-leaking-pipe-wrapper" class="fixed top-0 right-2 sm:right-12 z-35 pointer-events-none">
+    <div class="relative flex items-center">
+      <svg width="220" height="52" viewBox="0 0 220 52" class="shake-pipe">
+        <rect x="0" y="4" width="220" height="18" fill="#334155" stroke="#0f172a" stroke-width="1.5"/>
+        <rect x="0" y="8" width="220" height="4" fill="#94a3b8" opacity="0.5"/>
+        <rect x="25" y="1" width="10" height="24" rx="2" fill="#1e293b" stroke="#0f172a" stroke-width="1.5"/>
+        <rect x="185" y="1" width="10" height="24" rx="2" fill="#1e293b" stroke="#0f172a" stroke-width="1.5"/>
+        <!-- Rekahan Pecah & Pancutan Sisi -->
+        <path d="M 105 4 L 112 11 L 108 16 L 116 22" stroke="#38bdf8" stroke-width="2.5" fill="none"/>
+        <path d="M 110 10 L 103 14 L 106 19" stroke="#e0f2fe" stroke-width="1.8" fill="none"/>
+        <ellipse cx="110" cy="14" rx="7" ry="3.5" fill="#38bdf8" opacity="0.7"/>
+      </svg>
+      <div id="pipe-nozzle-source" class="absolute left-[110px] top-[18px] w-2 h-2"></div>
     </div>
   </div>
 
   <!-- HEADER UTAMA -->
-  <header class="bg-slate-950/95 backdrop-blur border-b-2 border-cyan-500/70 sticky top-0 z-30 px-3 sm:px-4 py-2.5 shadow-2xl mt-12 sm:mt-10">
+  <header class="bg-slate-950/95 backdrop-blur border-b-2 border-cyan-500/70 sticky top-0 z-30 px-3 sm:px-4 py-2.5 shadow-2xl">
     <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-lg bg-cyan-700 flex items-center justify-center text-2xl shadow-lg shadow-cyan-600/40 border border-cyan-300">
@@ -119,7 +96,7 @@
         </div>
         <div>
           <h1 class="text-xs sm:text-sm font-pixel text-cyan-300 tracking-wider">MISI PAIP SEMEKAR (RBT T1)</h1>
-          <p class="text-[11px] text-cyan-200 font-retro tracking-wider">OPERASI MEMBAIKI KEBOCORAN AIR BENGKEL RBT (1S1 & 1S2)</p>
+          <p class="text-[11px] text-cyan-200 font-retro tracking-wider">OPERASI MEMBAIKI PAIP PECAH BENGKEL RBT (1S1 & 1S2)</p>
         </div>
       </div>
 
@@ -153,7 +130,7 @@
   </header>
 
   <!-- RUANGAN TETAP: 3 WIRA PEMBAIKIAN TERBAIK -->
-  <section id="top-heroes-section" class="bg-gradient-to-r from-slate-950 via-cyan-950/70 to-slate-950 border-b-2 border-cyan-500/60 sticky top-[73px] sm:top-[65px] z-25 backdrop-blur-md shadow-xl px-3 py-2">
+  <section id="top-heroes-section" class="bg-gradient-to-r from-slate-950 via-cyan-950/70 to-slate-950 border-b-2 border-cyan-500/60 sticky top-[57px] z-25 backdrop-blur-md shadow-xl px-3 py-2">
     <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
       <div class="flex items-center gap-2 shrink-0">
         <span class="text-lg animate-bounce">🧰</span>
@@ -163,7 +140,7 @@
     </div>
   </section>
 
-  <!-- PAPARAN BENCANA (JIKA GAGAL DAN AIR MEMENUHI 100% RUANG) -->
+  <!-- PAPARAN BENCANA (JIKA GAGAL MENJELANG 8.00 MALAM ESOK) -->
   <div id="disaster-banner-container" class="hidden max-w-4xl mx-auto p-4 relative z-30 mt-6">
     <div class="bg-blue-950/95 border-4 border-cyan-400 rounded-3xl p-6 sm:p-8 text-center shadow-[0_0_60px_rgba(6,182,212,0.8)] backdrop-blur-md animate-pulse">
       <div class="text-5xl sm:text-6xl mb-3">🌊 ⚠️ 🌊</div>
@@ -171,11 +148,11 @@
         BENGKEL RBT DILIMPAHI AIR SEPENUHNYA! OPERASI GAGAL!
       </h2>
       <p class="text-xs sm:text-sm text-gray-200 font-mono mb-4 leading-relaxed">
-        Tempoh pembaikan telah tamat pada jam 5.00 Petang. Syarat minimum 15 orang murid dan 100 soalan gagal dipenuhi sebelum tempoh tamat.
+        Tempoh pembaikan telah tamat pada <strong>jam 8.00 Malam</strong>. Paras air telah memenuhi 100% bengkel kerana syarat 15 murid dan 100 soalan tidak dipenuhi sebelum tempoh tamat.
       </p>
       <div class="inline-block bg-black/80 border-2 border-cyan-400 rounded-2xl p-4 mb-4">
         <p class="text-xs font-pixel text-yellow-300 mb-1">AKSES DIKUNCI KEPADA GURU SAHAJA</p>
-        <p class="text-[11px] text-gray-300 font-mono">Guru boleh menyemak rekod pencapaian murid melalui Portal Admin.</p>
+        <p class="text-[11px] text-gray-300 font-mono">Guru boleh menyemak rekod markah dan status operasi melalui Portal Admin.</p>
       </div>
       <div>
         <button type="button" onclick="openAdminModal()" class="px-6 py-3 bg-cyan-700 hover:bg-cyan-600 border-2 border-yellow-300 rounded-xl font-pixel text-xs text-white shadow-xl transition transform hover:scale-105">
@@ -185,7 +162,7 @@
     </div>
   </div>
 
-  <!-- KANDUNGAN UTAMA -->
+  <!-- KANDUNGAN UTAMA (VIEW CONTAINER) -->
   <main id="main-content-wrapper" class="max-w-6xl w-full mx-auto p-3 sm:p-4 relative z-10">
 
     <!-- VIEW 1: HOME -->
@@ -197,7 +174,7 @@
           <div>
             <h2 class="text-sm sm:text-base font-pixel text-cyan-300">PANDUAN OPERASI PEMBAIKAN PAIP BENGKEL RBT</h2>
             <p class="text-xs text-cyan-200 font-mono">
-              Tempoh Akhir Operasi: <strong>Jam 5.00 Petang (12 Oktober 2026)</strong>
+              Tempoh Akhir Misi: <strong>Jam 8.00 Malam Esok (12 Oktober 2026)</strong>
             </p>
           </div>
         </div>
@@ -206,35 +183,35 @@
           <div class="bg-black/60 p-3 rounded-xl border border-cyan-500/30">
             <div class="font-pixel text-cyan-400 mb-1 text-[11px]">1. KUMPUL MARKAH /40</div>
             <p class="text-gray-300 text-[11px] leading-relaxed">
-              Setiap murid diberi <strong>4 kali peluang percubaan</strong> (10 soalan/sesi). Markah setiap sesi dicantum sehingga <strong>40 markah penuh</strong>.
+              Setiap murid diberi <strong>4 kali percubaan</strong> (10 soalan/sesi). Markah setiap sesi dicantum sehingga <strong>40 markah penuh</strong>.
             </p>
           </div>
 
           <div class="bg-black/60 p-3 rounded-xl border border-blue-500/30">
             <div class="font-pixel text-blue-400 mb-1 text-[11px]">2. SURUTKAN AIR 0%</div>
             <p class="text-gray-300 text-[11px] leading-relaxed">
-              Air disurutkan sehingga 0% apabila <strong>semua 100 soalan</strong> dijawab tepat DAN sekurang-kurangnya <strong>15 murid berbeza</strong> turut serta.
+              Air disurutkan sehingga 0% apabila <strong>100 soalan</strong> dijawab tepat DAN sekurang-kurangnya <strong>15 murid</strong> menyertai operasi.
             </p>
           </div>
 
           <div class="bg-black/60 p-3 rounded-xl border border-teal-500/30">
-            <div class="font-pixel text-teal-400 mb-1 text-[11px]">3. PARAS KEKAL SURUT</div>
+            <div class="font-pixel text-teal-400 mb-1 text-[11px]">3. SENSOR GRAVITI</div>
             <p class="text-gray-300 text-[11px] leading-relaxed">
-              Setiap injap paip yang dibaiki menutup punca kebocoran secara kekal. Paras limpahan air yang telah surut <strong>tidak akan naik semula</strong>.
+              Gerakkan atau condongkan telefon anda ke kiri dan ke kanan untuk melihat simulasi air berkocak secara graviti dinamik!
             </p>
           </div>
 
           <div class="bg-black/60 p-3 rounded-xl border border-amber-500/30">
-            <div class="font-pixel text-amber-400 mb-1 text-[11px]">4. PARAS ASAL 40%</div>
+            <div class="font-pixel text-amber-400 mb-1 text-[11px]">4. AWAS: LIMPAHAN 12 TGH HARI</div>
             <p class="text-gray-300 text-[11px] leading-relaxed">
-              Secara lalai, air telah memenuhi <strong>40% ketinggian bengkel</strong> seumpama cawan diisi air. Bertindak pantas sebelum melimpah 100%!
+              Bermula <strong>12.00 tgh hari esok</strong>, air bertambah setiap minit dari 40% ke 100% sehingga <strong>8.00 malam</strong> jika tidak dibaiki!
             </p>
           </div>
         </div>
 
         <div class="mt-3 p-3 rounded-xl bg-cyan-950/40 border border-cyan-600/50 flex items-center justify-between text-xs">
           <div class="text-gray-300 font-mono">
-            ⏳ Masa Baki Menutup Injap Induk:
+            ⏳ Masa Baki Sehingga Misi Ditutup (8.00 Malam Esok):
           </div>
           <div id="inline-mission-timer" class="font-pixel text-yellow-300 font-bold text-xs sm:text-sm">
             -- Jam -- Minit -- Saat
@@ -282,7 +259,7 @@
           </div>
 
           <button type="button" id="btn-start-quiz" onclick="startQuizSession()" disabled class="w-full mt-3 py-4 bg-gradient-to-r from-cyan-600 via-blue-600 to-teal-500 hover:from-cyan-500 hover:to-teal-400 disabled:opacity-40 disabled:cursor-not-allowed text-black font-pixel font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-cyan-700/50 transform active:scale-95 transition border-2 border-cyan-300">
-            🚰 MULAKAN PEMBAIKAN PAIP BOCOR!
+            🚰 MULAKAN PEMBAIKAN PAIP PECAH!
           </button>
         </div>
       </div>
@@ -447,9 +424,9 @@
   <!-- ========================================================================= -->
   <canvas id="waterStreamCanvas" class="fixed inset-0 pointer-events-none z-[9990]"></canvas>
 
-  <!-- Takungan Air Bawah (Bermula Default 40% Ketinggian Skrin: 40vh) -->
-  <div id="water-reservoir-wrapper" class="fixed bottom-9 left-0 right-0 pointer-events-none z-[9991] overflow-hidden transition-all duration-700" style="height: 40vh;">
-    <canvas id="waterPoolCanvas" class="w-full h-full block filter drop-shadow-[0_-8px_16px_rgba(2,132,199,0.6)]"></canvas>
+  <!-- TAKUNGAN AIR BAWAH (LUTSUT 30% DAN TIADA SEMPADAN GARISAN KERAS) -->
+  <div id="water-reservoir-wrapper" class="fixed bottom-9 left-0 right-0 pointer-events-none z-[9991] overflow-hidden transition-all duration-700" style="height: 40vh; opacity: 0.30;">
+    <canvas id="waterPoolCanvas" class="w-full h-full block"></canvas>
   </div>
 
   <!-- UNIT JURUTEKNIK DI SUDUT KIRI BAWAH -->
@@ -485,7 +462,7 @@
 
     <div class="hidden sm:flex flex-col bg-slate-950/80 backdrop-blur-sm px-2 py-0.5 rounded border border-cyan-500/40 text-[9px] mb-1">
       <span class="font-pixel text-cyan-300">SKUAD PAIP RBT</span>
-      <span class="font-mono text-cyan-100" id="plumber-speech">Menutup injap utama!</span>
+      <span class="font-mono text-cyan-100" id="plumber-speech">Menyumbat rekahan paip!</span>
     </div>
   </div>
 
@@ -498,10 +475,8 @@
     </div>
     <span class="text-slate-600">|</span>
     <div class="flex items-center gap-1.5 text-gray-400 shrink-0">
-      <span>ALIRAN AIR:</span>
-      <button type="button" onclick="setWaterSpeed('slow')" class="text-cyan-300 hover:underline">PERLAHAN</button>
-      <span>/</span>
-      <button type="button" onclick="setWaterSpeed('fast')" class="text-blue-400 hover:underline">LAJU</button>
+      <span>GRAVITI:</span>
+      <span id="gravity-status-indicator" class="text-emerald-400">AKTIF 📱</span>
     </div>
   </div>
 
@@ -554,12 +529,12 @@
           <div class="bg-black/70 p-3 rounded-xl border border-slate-800">
             <div class="font-pixel text-[9px] text-gray-400 mb-1">PARAS AIR BENGKEL</div>
             <div class="text-lg font-pixel text-yellow-300" id="admin-water-pct">40%</div>
-            <div class="text-[10px] text-gray-400 font-mono mt-0.5">Kekal Menurun</div>
+            <div class="text-[10px] text-gray-400 font-mono mt-0.5">Dinamik Masa & Murid</div>
           </div>
           <div class="bg-black/70 p-3 rounded-xl border border-slate-800">
             <div class="font-pixel text-[9px] text-gray-400 mb-1">STATUS MISI</div>
             <div class="text-xs font-pixel text-cyan-300 truncate pt-1" id="admin-mission-status">BERJALAN</div>
-            <div class="text-[10px] text-gray-400 font-mono mt-1">Tamat 5.00 Ptg Esok</div>
+            <div class="text-[10px] text-gray-400 font-mono mt-1">Tamat 8.00 Mlm Esok</div>
           </div>
         </div>
 
@@ -618,63 +593,36 @@
   </div>
 
   <script>
-    // URL WEB APP TERKINI GOOGLE APPS SCRIPT
     const GAS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyh_L4FCe7BfmeP_FWRvBa6rpkVRkbxIROJiyC3Q3ZO4soa-i94Y7-UrboaHtDUSwjHsg/exec";
     const MAX_ALLOWED_ATTEMPTS = 4;
-    const MISSION_DEADLINE_TIMESTAMP = new Date("2026-10-12T17:00:00+08:00").getTime();
+
+    // Tetapan Masa: Mula Banjir 12.00 Tgh Hari, Tamat 8.00 Malam (20:00), 12 Oktober 2026
+    const MISSION_START_FLOOD_TIMESTAMP = new Date("2026-10-12T12:00:00+08:00").getTime();
+    const MISSION_DEADLINE_TIMESTAMP = new Date("2026-10-12T20:00:00+08:00").getTime();
 
     // SENARAI MURID KELAS 1S1 & 1S2
     const STUDENTS_DATA = {
       "1S1": [
-        "AISSY NAUFAL BIN ROSISKANDAR",
-        "AISY FATIH AMIRULLAH BIN AZMAN",
-        "DAMIA AMANI BINTI MOHD SUKRI @ MOHD SALLEH",
-        "FAIZ FAHRYZAL BIN MOHD HANIF",
-        "HOONG WAN WAN",
-        "JETHRO TAN HAO SHEN",
-        "LIM QI QUAN",
-        "LISA BINTI ROSLI",
-        "MUHAMMAD AARON EQUWAN BIN MOHD ISA",
-        "MUHAMMAD ADAM DZULKARNAIN BIN MOHD AKHBAR",
-        "MUHAMMAD DANISH BIN ZULKIFLI",
-        "MUHAMMAD IQHWAN BIN SAHAR",
-        "NUR AFIQAH MAISARAH BINTI MOHD HAIDHIR",
-        "NUR AINA NADHIRA BINTI EDDY OSMAN",
-        "NUR AINA NAZIHA BINTI REDUAN",
-        "NUR RAFA HANA BINTI MUHAMED FADLI",
-        "PUAH SHAO HING",
-        "RYAN KELVIN",
-        "TANG SIAW ROU",
-        "TRI ULFA ELYNA BINTI KUSNADI"
+        "AISSY NAUFAL BIN ROSISKANDAR", "AISY FATIH AMIRULLAH BIN AZMAN", "DAMIA AMANI BINTI MOHD SUKRI @ MOHD SALLEH",
+        "FAIZ FAHRYZAL BIN MOHD HANIF", "HOONG WAN WAN", "JETHRO TAN HAO SHEN", "LIM QI QUAN",
+        "LISA BINTI ROSLI", "MUHAMMAD AARON EQUWAN BIN MOHD ISA", "MUHAMMAD ADAM DZULKARNAIN BIN MOHD AKHBAR",
+        "MUHAMMAD DANISH BIN ZULKIFLI", "MUHAMMAD IQHWAN BIN SAHAR", "NUR AFIQAH MAISARAH BINTI MOHD HAIDHIR",
+        "NUR AINA NADHIRA BINTI EDDY OSMAN", "NUR AINA NAZIHA BINTI REDUAN", "NUR RAFA HANA BINTI MUHAMED FADLI",
+        "PUAH SHAO HING", "RYAN KELVIN", "TANG SIAW ROU", "TRI ULFA ELYNA BINTI KUSNADI"
       ],
       "1S2": [
-        "ALIF DANISH BIN MOHD SAIFULLYZAN SHAH",
-        "ANNUR AFIA RAISHA BINTI AMRI",
-        "DARIQ HAFRIZAL BIN ROSLI",
-        "EZZHAM HAQIMI BAHRIN BIN BAHRIN",
-        "MUHAMAD MUAZ DARWISH BIN MUHAMAD HAIRUL NIZAM",
-        "MUHAMMAD AKIF FIRAAS BIN ARMAN",
-        "MUHAMMAD DANIYAL IRSYAD BIN ABDUL JABAR ALI",
-        "MUHAMMAD HAFIZAL BIN HIRMAN",
-        "MUHAMMAD IRFAN HAKIMIE",
-        "MUHAMMAD RYHAN MUQMIN BIN ABDUL RAZZAQ",
-        "NOR SHAFIKAH BINTI AZMAN",
-        "NOR SHAHZAMILA BINTI ZAMREE",
-        "NUR AINA NABIHAH BINTI HANIF",
-        "NUR AIRIES QALIESYA TAN BINTI ANUAR TAN",
-        "NUR AKIRA BINTI RIZAL",
-        "NUR EZZARA SOFEA BINTI MOHD YUSLIZAM",
-        "NUR HUMAYRAA AMANI BINTI MD HADAYAT",
-        "SYAHARA BINTI MU",
-        "SYED SHAHFUWAN BIN SYED MOHD AZLAN",
-        "TAN ZE YU",
-        "TEY MING YANG",
-        "ZAHRA SOFIA BINTI ABDUL MANSOR",
-        "ZAINOL WANALIFF BIN EZADIN"
+        "ALIF DANISH BIN MOHD SAIFULLYZAN SHAH", "ANNUR AFIA RAISHA BINTI AMRI", "DARIQ HAFRIZAL BIN ROSLI",
+        "EZZHAM HAQIMI BAHRIN BIN BAHRIN", "MUHAMAD MUAZ DARWISH BIN MUHAMAD HAIRUL NIZAM",
+        "MUHAMMAD AKIF FIRAAS BIN ARMAN", "MUHAMMAD DANIYAL IRSYAD BIN ABDUL JABAR ALI",
+        "MUHAMMAD HAFIZAL BIN HIRMAN", "MUHAMMAD IRFAN HAKIMIE", "MUHAMMAD RYHAN MUQMIN BIN ABDUL RAZZAQ",
+        "NOR SHAFIKAH BINTI AZMAN", "NOR SHAHZAMILA BINTI ZAMREE", "NUR AINA NABIHAH BINTI HANIF",
+        "NUR AIRIES QALIESYA TAN BINTI ANUAR TAN", "NUR AKIRA BINTI RIZAL", "NUR EZZARA SOFEA BINTI MOHD YUSLIZAM",
+        "NUR HUMAYRAA AMANI BINTI MD HADAYAT", "SYAHARA BINTI MU", "SYED SHAHFUWAN BIN SYED MOHD AZLAN",
+        "TAN ZE YU", "TEY MING YANG", "ZAHRA SOFIA BINTI ABDUL MANSOR", "ZAINOL WANALIFF BIN EZADIN"
       ]
     };
 
-    // BANK SOALAN RBT TINGKATAN 1
+    // BANK SOALAN RBT TINGKATAN 1 (100 SOALAN)
     const QUESTION_BANK = [
       { id: 1, bab: "BAB 1: PENGENALAN REKA BENTUK & TEKNOLOGI", q: "Semasa menggantikan sambungan paip yang bocor, juruteknik memilih penyambung PVC yang menepati fungsi menyalurkan air tanpa meleleh. Kriteria reka bentuk ini menepati?", options: ["Kreativiti", "Fungsi (Functionality)", "Rupa bentuk", "Kekuatan bahan semata-mata"], ans: 1, exp: "Kriteria fungsi memastikan sesuatu produk reka bentuk beroperasi mengikut tujuan asalnya." },
       { id: 2, bab: "BAB 1: PENGENALAN REKA BENTUK & TEKNOLOGI", q: "Injap bebola direka dengan pemegang berwarna merah terang bagi memudahkan murid melihat kedudukan tuas kecemasan ketika paip pecah. Ini memanfaatkan elemen?", options: ["Warna", "Tekstur", "Ruang", "Bentuk 3D"], ans: 0, exp: "Elemen warna digunakan untuk memberi impak visual, penegasan dan keselamatan." },
@@ -708,7 +656,6 @@
       { id: 30, bab: "BAB 5.2: REKA BENTUK FESYEN & KESELAMATAN", q: "Alatan memotong yang paling sesuai digunakan untuk memotong paip PVC dengan potongan tegak dan kemas ialah?", options: ["Pemotong paip PVC (PVC Pipe Cutter) / Gergaji besi", "Gunting kain", "Pisau utiliti biasa", "Pahat"], ans: 0, exp: "Pemotong paip PVC khas atau gergaji besi menghasilkan keratan lurus tanpa meretakkan dinding paip." }
     ];
 
-    // Mengembangkan bank soalan sehingga 100 soalan berasaskan DSKP RBT T1
     (function expandQuestionBankTo100() {
       const baseTopics = [
         { bab: "BAB 1: PENGENALAN REKA BENTUK & TEKNOLOGI", desc: "Prinsip dan Elemen Reka Bentuk Bengkel" },
@@ -737,7 +684,6 @@
       }
     })();
 
-    // RAWAKKAN PILIHAN JAWAPAN DENGAN CORAK SEIMBANG
     (function shuffleOptionsBalanced() {
       const balancedPattern = [1, 2, 0, 3, 2, 0, 1, 3, 0, 2];
       QUESTION_BANK.forEach(item => {
@@ -769,6 +715,40 @@
     let audioCtx = null;
     let audioEnabled = true;
     let isDisasterTriggered = false;
+
+    // SISTEM GRAVITI MUDAH ALIH (DEVICE ORIENTATION GYRO)
+    let targetTilt = 0;
+    let currentTilt = 0;
+    let isGyroPermissionGranted = false;
+
+    function handleOrientation(e) {
+      if (e.gamma !== null && e.gamma !== undefined) {
+        // gamma: condong kiri/kanan [-90, 90] darjah
+        const clampedGamma = Math.max(-45, Math.min(45, e.gamma));
+        targetTilt = (clampedGamma / 45) * 0.45; // kecerunan sudut dalam radian
+      }
+    }
+
+    function initGyroSensors() {
+      if (isGyroPermissionGranted) return;
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+          .then(res => {
+            if (res === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation);
+              isGyroPermissionGranted = true;
+            }
+          })
+          .catch(() => {});
+      } else if (window.DeviceOrientationEvent) {
+        window.addEventListener('deviceorientation', handleOrientation);
+        isGyroPermissionGranted = true;
+      }
+    }
+
+    // Aktifkan sensor sebaik pengguna menyentuh skrin
+    window.addEventListener('touchstart', initGyroSensors, { once: true });
+    window.addEventListener('click', initGyroSensors, { once: true });
 
     function initAudio() {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -822,7 +802,7 @@
 
       if (diff <= 0) {
         if (timerBadge) timerBadge.textContent = "TAMAT!";
-        if (inlineTimer) inlineTimer.textContent = "TEMPOH TAMAT (5.00 PTG)";
+        if (inlineTimer) inlineTimer.textContent = "TEMPOH TAMAT (8.00 MLM)";
         checkDisasterCondition();
         return;
       }
@@ -855,6 +835,7 @@
       isDisasterTriggered = true;
       const resWrapper = document.getElementById("water-reservoir-wrapper");
       resWrapper.style.height = "100vh";
+      resWrapper.style.opacity = "0.75";
 
       document.getElementById("main-content-wrapper").classList.add("hidden");
       document.getElementById("top-heroes-section").classList.add("hidden");
@@ -873,6 +854,9 @@
 
     function revertDisasterMode() {
       isDisasterTriggered = false;
+      const resWrapper = document.getElementById("water-reservoir-wrapper");
+      resWrapper.style.opacity = "0.30";
+
       document.getElementById("main-content-wrapper").classList.remove("hidden");
       document.getElementById("top-heroes-section").classList.remove("hidden");
       document.getElementById("plumber-unit").classList.remove("hidden");
@@ -884,7 +868,7 @@
       updateGlobalWaterUI();
     }
 
-    // SIMULASI ALIRAN GRAVITI AIR DARI ATAS KE BAWAH
+    // SIMULASI ALIRAN GRAVITI AIR DARI RETAKAN PAIP KE TAKUNGAN BAWAH
     const streamCanvas = document.getElementById("waterStreamCanvas");
     const streamCtx = streamCanvas.getContext("2d");
     let streamParticles = [];
@@ -906,13 +890,13 @@
       const rate = streamSpeedMode === "normal" ? 6 : 12;
       for (let i = 0; i < rate; i++) {
         streamParticles.push({
-          x: originX + (Math.random() - 0.5) * 14,
+          x: originX + (Math.random() - 0.5) * 8,
           y: originY,
           vx: (Math.random() - 0.5) * 1.5,
-          vy: 2.5 + Math.random() * 3.5,
+          vy: 2.2 + Math.random() * 3.8,
           gravity: 0.38,
-          radius: 2 + Math.random() * 3.5,
-          alpha: 0.75 + Math.random() * 0.25
+          radius: 1.8 + Math.random() * 2.8,
+          alpha: 0.55 + Math.random() * 0.35
         });
       }
     }
@@ -927,6 +911,8 @@
       for (let i = streamParticles.length - 1; i >= 0; i--) {
         const p = streamParticles[i];
         p.vy += p.gravity;
+        // Graviti sensor telefon mempengaruhi pesongan arah titisan air
+        p.vx += currentTilt * 0.45;
         p.x += p.vx;
         p.y += p.vy;
 
@@ -945,7 +931,7 @@
       requestAnimationFrame(updateAndRenderStream);
     }
 
-    // TAKUNGAN AIR BAWAH (GELOMBANG SINE DINAMIK 40vh DEFAULT)
+    // TAKUNGAN AIR BAWAH (LUTSUT 30% DAN BERKOCAK MENGIKUT SENSOR GRAVITI TELEFON)
     const poolCanvas = document.getElementById("waterPoolCanvas");
     const poolCtx = poolCanvas.getContext("2d");
     let waveStep = 0;
@@ -958,8 +944,8 @@
     window.addEventListener("resize", resizePoolCanvas);
 
     function triggerRippleSplash(xPos) {
-      if (ripples.length < 30) {
-        ripples.push({ x: xPos, radius: 2, alpha: 0.8 });
+      if (ripples.length < 25) {
+        ripples.push({ x: xPos, radius: 2, alpha: 0.6 });
       }
     }
 
@@ -968,41 +954,52 @@
       const h = poolCanvas.height;
       poolCtx.clearRect(0, 0, w, h);
 
+      // Lerp kecerunan orientasi graviti untuk kelicinan pergerakan air
+      currentTilt += (targetTilt - currentTilt) * 0.08;
+
       waveStep += 0.04;
-      const waveHeight = 8;
-      const waveFreq = 0.015;
+      const waveHeight = 6;
+      const waveFreq = 0.012;
 
       const grad = poolCtx.createLinearGradient(0, 0, 0, h);
-      grad.addColorStop(0, "rgba(2, 132, 199, 0.85)");
-      grad.addColorStop(0.3, "rgba(3, 105, 161, 0.92)");
-      grad.addColorStop(1, "rgba(8, 47, 73, 0.98)");
+      grad.addColorStop(0, "rgba(56, 189, 248, 0.4)");
+      grad.addColorStop(0.3, "rgba(2, 132, 199, 0.7)");
+      grad.addColorStop(1, "rgba(3, 105, 161, 0.95)");
 
       poolCtx.fillStyle = grad;
       poolCtx.beginPath();
-      poolCtx.moveTo(0, waveHeight * Math.sin(waveStep));
+
+      // Kira titik awal kiri dengan kesan kecondongan
+      const startTiltY = -(0 - w / 2) * currentTilt * 0.4;
+      poolCtx.moveTo(0, waveHeight * Math.sin(waveStep) + startTiltY + 12);
 
       for (let x = 0; x <= w; x += 15) {
-        const y = Math.sin(x * waveFreq + waveStep) * waveHeight +
-                  Math.cos(x * 0.02 - waveStep * 0.8) * 4;
-        poolCtx.lineTo(x, y + 10);
+        // Graviti telefon: Jika telefon condong ke kanan (currentTilt > 0), air condong ke kanan (x tinggi = aras tinggi)
+        const tiltOffsetY = -(x - w / 2) * currentTilt * 0.4;
+        const yWave = Math.sin(x * waveFreq + waveStep) * waveHeight +
+                      Math.cos(x * 0.02 - waveStep * 0.8) * 3;
+        poolCtx.lineTo(x, yWave + tiltOffsetY + 12);
       }
+
       poolCtx.lineTo(w, h);
       poolCtx.lineTo(0, h);
       poolCtx.closePath();
-      poolCtx.fill();
+      poolCtx.fill(); // Isian lancar tanpa stroke sempadan
 
+      // Riak Percikan Air
       for (let i = ripples.length - 1; i >= 0; i--) {
         const r = ripples[i];
-        r.radius += 1.2;
-        r.alpha -= 0.03;
+        r.radius += 1.0;
+        r.alpha -= 0.025;
         if (r.alpha <= 0) {
           ripples.splice(i, 1);
           continue;
         }
+        const rippleTiltY = -(r.x - w / 2) * currentTilt * 0.4;
         poolCtx.beginPath();
-        poolCtx.arc(r.x, 10, r.radius, 0, Math.PI * 2);
-        poolCtx.strokeStyle = `rgba(224, 242, 254, ${r.alpha})`;
-        poolCtx.lineWidth = 1.5;
+        poolCtx.arc(r.x, 12 + rippleTiltY, r.radius, 0, Math.PI * 2);
+        poolCtx.strokeStyle = `rgba(224, 242, 254, ${r.alpha * 0.5})`;
+        poolCtx.lineWidth = 1;
         poolCtx.stroke();
       }
 
@@ -1013,9 +1010,11 @@
       streamSpeedMode = spd === "slow" ? "slow" : "normal";
     }
 
+    // FORMULA DINAMIK: DEFAULT 40% & NAIK SETIAP MINIT (12.00 TGH HARI KE 8.00 MLM)
     function updateGlobalWaterUI() {
       if (isDisasterTriggered) return;
 
+      const now = Date.now();
       const totalQuestionsCount = 100;
       const solvedCount = answeredGlobalQuestions.size;
       const studentCount = uniqueParticipants.size;
@@ -1023,20 +1022,29 @@
 
       document.getElementById("unique-student-count-badge").textContent = `${studentCount}/${reqStudents}`;
 
-      let remainingWater = Math.max(0, Math.round(40 - ((solvedCount / totalQuestionsCount) * 40)));
-
-      if (studentCount < reqStudents && remainingWater === 0) {
-        remainingWater = 5;
+      let floodBase = 40;
+      if (now >= MISSION_START_FLOOD_TIMESTAMP) {
+        const elapsed = Math.min(MISSION_DEADLINE_TIMESTAMP - MISSION_START_FLOOD_TIMESTAMP, now - MISSION_START_FLOOD_TIMESTAMP);
+        const totalDuration = MISSION_DEADLINE_TIMESTAMP - MISSION_START_FLOOD_TIMESTAMP;
+        const timeRatio = Math.max(0, Math.min(1, elapsed / totalDuration));
+        floodBase = 40 + (timeRatio * 60);
       }
 
-      let lowestWater = Number(localStorage.getItem("RBT_T1_LOWEST_WATER_PCT") || 40);
-      if (remainingWater < lowestWater) {
-        lowestWater = remainingWater;
-        localStorage.setItem("RBT_T1_LOWEST_WATER_PCT", lowestWater);
+      const repairRatio = Math.min(1, solvedCount / totalQuestionsCount);
+      let calculatedWater = floodBase * (1 - repairRatio);
+
+      let savedLowest = Number(localStorage.getItem("RBT_T1_LOWEST_WATER_PCT") || 40);
+      if (calculatedWater < savedLowest) {
+        savedLowest = calculatedWater;
+        localStorage.setItem("RBT_T1_LOWEST_WATER_PCT", savedLowest);
       }
 
-      const displayVal = lowestWater;
-      const isCompletelyDrained = (displayVal <= 0 && studentCount >= reqStudents);
+      let displayVal = Math.round(Math.max(0, Math.min(100, calculatedWater)));
+      if (studentCount < reqStudents && displayVal < 5) {
+        displayVal = 5;
+      }
+
+      const isCompletelyDrained = (displayVal <= 0 && studentCount >= reqStudents && solvedCount >= 100);
 
       document.querySelectorAll(".global-water-val").forEach(el => {
         if (isCompletelyDrained) {
@@ -1201,6 +1209,7 @@
       }
 
       initAudio();
+      initGyroSensors();
       const shuffled = [...QUESTION_BANK].sort(() => 0.5 - Math.random());
       sessionQuestions = shuffled.slice(0, 10);
       currentQuestionIdx = 0;
@@ -1253,7 +1262,7 @@
 
       const quizCard = document.getElementById("view-quiz");
       if (quizCard) {
-        const headerOffset = 115;
+        const headerOffset = 80;
         const cardPosition = quizCard.getBoundingClientRect().top;
         const targetScroll = cardPosition + window.pageYOffset - headerOffset;
         window.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
@@ -1283,12 +1292,12 @@
         answeredGlobalQuestions.add(qData.id);
         saveGlobalQuestionsProgress();
 
-        document.getElementById("plumber-speech").textContent = "SKUAD PAIP: Injap berjaya diketatkan! Aliran surut!";
+        document.getElementById("plumber-speech").textContent = "SKUAD PAIP: Injap diketatkan! Aliran berjaya disekat!";
       } else {
         playTone(160, "sawtooth", 0.4, 0.25);
         buttons[selectedIndex].classList.replace("border-slate-700", "border-red-500");
         buttons[selectedIndex].classList.replace("bg-slate-800/90", "bg-red-950/60");
-        document.getElementById("plumber-speech").textContent = "SKUAD PAIP: Awas! Sambungan paip masih menitik!";
+        document.getElementById("plumber-speech").textContent = "SKUAD PAIP: Awas! Tekanan air masih menolak keluar!";
       }
 
       updateSessionWaterGauge();
@@ -1720,7 +1729,10 @@
       updateGlobalWaterUI();
 
       updateCountdownDisplay();
-      setInterval(updateCountdownDisplay, 1000);
+      setInterval(() => {
+        updateCountdownDisplay();
+        updateGlobalWaterUI();
+      }, 1000);
     });
   </script>
 </body>
